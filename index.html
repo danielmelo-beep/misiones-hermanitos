@@ -152,6 +152,27 @@
   .gait-steps i{width:12px;height:12px;border-radius:50%;background:#ffffff22;display:block}
   .gait-steps i.ok{background:var(--lime);box-shadow:0 0 8px var(--lime)}
   .gait-steps i.now{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+  /* Estudio: ruta, quiz, tablas y robot */
+  .ruta{display:flex;flex-direction:column;gap:14px;align-items:center;margin-top:14px}
+  .nodo{width:min(94%,460px);display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:20px;border:3px solid #ffffff22;background:#160c33;color:var(--ink);font-family:'Baloo 2';font-weight:800;font-size:16px;cursor:pointer;text-align:left}
+  .nodo.open{border-color:var(--violet);box-shadow:0 0 18px -6px var(--violet)}
+  .nodo.done{border-color:var(--lime);background:#173a1c}
+  .nodo.lock{opacity:.45;cursor:not-allowed}
+  .nodo-n{font-family:'Bungee';font-size:18px;color:var(--yellow);min-width:28px}
+  .nodo-ic{font-size:30px}
+  .nodo-t{flex:1}
+  .opt{padding:14px;border-radius:16px;border:3px solid #ffffff26;background:#0a0420;color:var(--ink);font-family:'Baloo 2';font-weight:800;font-size:18px;cursor:pointer}
+  .opt.ok{border-color:var(--lime);background:#173a1c}
+  .opt.bad{border-color:var(--pink);background:#3b0d2b}
+  .opt:disabled{cursor:default}
+  .tablero{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-width:340px;margin:0 auto}
+  .celda{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:26px;border-radius:12px;background:#ffffff0d;border:2px solid #ffffff1a}
+  .celda.pared{background:#3b0d2b}
+  .celda.meta{background:#173a1c}
+  .prog{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px;min-height:34px}
+  .prog span{background:var(--violet);color:#fff;font-weight:800;border-radius:10px;padding:4px 10px}
+  .flechas{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .flecha{font-size:28px;padding:10px;border-radius:14px;border:0;background:var(--cyan);color:#00222a;font-weight:800;cursor:pointer}
   .hidden{display:none !important}
   .photo-input{display:none}
 </style>
@@ -178,6 +199,7 @@
     <div class="section-h" style="--c:var(--lime)">🎯 MISIONES DE HOY</div>
     <div class="missions" id="missions"></div>
 
+    <div id="estudio-entry"></div>
     <div id="gait-entry"></div>
     <div class="section-h" style="--c:var(--yellow)">🏆 INSIGNIAS</div>
     <div class="badges" id="badges"></div>
@@ -190,6 +212,13 @@
     <div id="gait-body"></div>
     <div id="gait-semana" style="margin-top:14px"></div>
     <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="gait-back">← VOLVER A MISIONES</button></div>
+  </section>
+
+  <!-- PANTALLA: ruta de estudio -->
+  <section id="v-estudio" class="hidden">
+    <div class="section-h" style="--c:var(--violet)">🎓 RUTA DEL TERCERO</div>
+    <div id="est-body"></div>
+    <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="est-back">← VOLVER A MISIONES</button></div>
   </section>
 
   <!-- PANTALLA: panel de padres -->
@@ -231,7 +260,7 @@ function toast(msg, err=false){
   const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err?' err':'');
   clearTimeout(toast._t); toast._t = setTimeout(()=> t.className='toast', 2600);
 }
-function show(id){ ['v-pick','v-play','v-panel','v-gait'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id)); window.scrollTo({top:0,behavior:'smooth'}); }
+function show(id){ ['v-pick','v-play','v-panel','v-gait','v-estudio'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id)); window.scrollTo({top:0,behavior:'smooth'}); }
 
 /* ============ DATOS ============ */
 async function loadBase(){
@@ -338,6 +367,7 @@ function renderPlay(){
   });
   const stats = { total: state.completados.length, racha, nivel, porMision };
   renderGaitEntry();
+  renderEstudioEntry();
   $('#badges').innerHTML = INSIGNIAS.map(b => {
     const on = b.cond(stats);
     return `<div class="badge ${on?'on':''}"><div class="bi">${b.icon}</div><div class="bn">${esc(b.nombre)}</div></div>`;
@@ -660,5 +690,6 @@ async function renderPanel(){
   $('#pin').addEventListener('keydown', e => { if (e.key==='Enter') $('#pin-go').click(); });
 })();
 </script>
+<script src="estudio.js"></script>
 </body>
 </html>

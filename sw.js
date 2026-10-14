@@ -1,6 +1,6 @@
 // Service worker: permite abrir la app aunque no haya internet y se actualiza al conectarse.
-const CACHE = 'misiones-v2';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+const CACHE = 'misiones-v3';
+const ASSETS = ['./', './index.html', './estudio.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
