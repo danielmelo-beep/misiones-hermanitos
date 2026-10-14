@@ -167,6 +167,43 @@
   .btn:disabled{opacity:.5;cursor:default}
   .btn.ghost{background:none;color:var(--muted);border:1px solid var(--line2);font-weight:600}
 
+  /* horarios y recordatorios */
+  .chip.hora{color:var(--lime);border-color:#B8FF3D55}
+  .chip.tarde{color:var(--pink);border-color:#FF3D8B77}
+  .chip.bono{color:var(--amber);border-color:#FFB02066}
+  .reloj{margin-top:12px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:12px 14px}
+  .reloj .l{font-family:var(--m);font-size:11px;letter-spacing:.16em;color:var(--lime);margin-bottom:8px}
+  .reloj .fila{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-weight:500;font-size:14px}
+  .reloj .fila:first-of-type{border-top:0}
+  .reloj .h{font-family:var(--m);font-size:12px;color:var(--cyan);min-width:74px}
+  .reloj .e{margin-left:auto;font-family:var(--m);font-size:11px}
+  .reloj .e.ok{color:var(--lime)} .reloj .e.tarde{color:var(--pink)} .reloj .e.pend{color:var(--muted)}
+  .reloj .nota{margin-top:8px;font-size:13px;color:var(--muted);line-height:1.4}
+  .notif{margin-top:12px;border:1px dashed var(--line2);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+  .notif .t{font-family:var(--m);font-size:12px;letter-spacing:.14em;color:var(--amber)}
+  .notif p{font-size:14px;font-weight:500;color:var(--muted);line-height:1.4}
+  .notif p b{color:var(--ink)}
+  .notif .row{display:flex;gap:10px;flex-wrap:wrap}
+  /* laboratorio de sistemas */
+  .lab-lista{display:grid;gap:10px;margin-top:12px}
+  .lab-card{display:grid;grid-template-columns:44px 1fr;column-gap:12px;align-items:center;text-align:left;width:100%;border:1px solid var(--line2);border-radius:8px;background:var(--panel);padding:12px 14px;color:var(--ink)}
+  .lab-card .em{grid-row:1 / span 2;font-size:30px;text-align:center}
+  .lab-card .t{font-weight:600;font-size:16px}
+  .lab-card .d{color:var(--muted);font-size:13px;font-weight:500}
+  .lab-card.done{border-color:var(--lime);background:#0E1D14}
+  .lab-card.lock{opacity:.55}
+  .lab-pasos{display:grid;gap:8px}
+  .lab-paso{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:12px 14px;line-height:1.4;font-weight:500}
+  .lab-paso input{width:24px;height:24px;flex:none;margin-top:2px;accent-color:#B8FF3D}
+  .lab-paso small{color:var(--muted);font-size:13px}
+  .lab-campo{display:block;font-weight:600;font-size:14px;margin-bottom:10px;color:var(--muted)}
+  .lab-campo input{display:block;width:100%;margin-top:4px;padding:11px 12px;border-radius:6px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);font-family:var(--f);font-size:15px}
+  .lab-q{margin-bottom:10px}
+  .lab-op{display:flex;gap:10px;align-items:center;padding:9px 4px;font-weight:500;min-height:44px}
+  .lab-op input{width:22px;height:22px;flex:none;accent-color:#22E4FF}
+  .lab-why{margin-top:6px;font-size:14px;font-weight:500;line-height:1.4;padding:8px 10px;border-radius:6px}
+  .lab-why.bien{background:#B8FF3D18;color:var(--lime)} .lab-why.mal{background:#FF3D8B18;color:#FF8FB8}
+
   /* módulo de marcha */
   .gait-warn{font-weight:500;font-size:14px;color:#FFD08A;background:#FFB02012;border:1px dashed var(--amber);border-radius:6px;padding:10px 12px;margin-bottom:14px;line-height:1.4}
   .gait-steps{display:flex;gap:6px;justify-content:center;margin:6px 0 14px;flex-wrap:wrap}
@@ -221,9 +258,13 @@
     <div class="topbar" id="topbar"></div>
     <div class="carta" id="carta"></div>
 
+    <div id="notif-entry"></div>
+    <div id="horario-entry"></div>
+
     <div class="section-h" style="--c:var(--lime)">// Misiones de hoy</div>
     <div class="missions" id="missions"></div>
 
+    <div id="lab-entry"></div>
     <div id="estudio-entry"></div>
     <div id="gait-entry"></div>
     <div class="section-h" style="--c:var(--amber)">// Insignias</div>
@@ -237,6 +278,13 @@
     <div id="gait-body"></div>
     <div id="gait-semana" style="margin-top:14px"></div>
     <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="gait-back">← Volver a misiones</button></div>
+  </section>
+
+  <!-- PANTALLA: laboratorio de sistemas (Frank) -->
+  <section id="v-lab" class="hidden">
+    <div class="section-h" style="--c:var(--cyan)">🧪 Laboratorio de sistemas</div>
+    <div id="lab-body"></div>
+    <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="lab-back">← Volver a misiones</button></div>
   </section>
 
   <!-- PANTALLA: ruta de estudio -->
@@ -305,7 +353,7 @@ function toast(msg, err=false){
   const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err?' err':'');
   clearTimeout(toast._t); toast._t = setTimeout(()=> t.className='toast', 3200);
 }
-function show(id){ ['v-pick','v-play','v-panel','v-gait','v-estudio'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id)); window.scrollTo({top:0,behavior:'smooth'}); }
+function show(id){ ['v-pick','v-play','v-panel','v-gait','v-estudio','v-lab'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id)); window.scrollTo({top:0,behavior:'smooth'}); }
 function vibrar(p){ try{ if (navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -323,7 +371,7 @@ async function loadBase(){
 async function fetchCompletados(ninoId){
   const out = [], paso = 1000;
   for (let desde = 0; ; desde += paso){
-    let q = sb.from('completados').select('id,nino_id,mision_id,fecha,foto_url')
+    let q = sb.from('completados').select('id,nino_id,mision_id,fecha,foto_url,created_at')
       .order('created_at', { ascending: true }).range(desde, desde + paso - 1);
     if (ninoId) q = q.eq('nino_id', ninoId);
     const { data, error } = await q;
@@ -342,9 +390,35 @@ async function loadResumen(){
   }));
 }
 
+/* ============ HORARIOS ============ */
+const BONO_A_TIEMPO = 5;
+const minDe = (h) => { const [a, b] = String(h).split(':'); return (+a) * 60 + (+b); };
+function fmtHora(h){
+  const m = minDe(h), hh = Math.floor(m / 60), mm = m % 60;
+  return `${hh % 12 === 0 ? 12 : hh % 12}:${String(mm).padStart(2, '0')} ${hh >= 12 ? 'p. m.' : 'a. m.'}`;
+}
+// Fecha y minutos del día en hora de Bogotá, sin importar la zona del celular
+function enBogota(d){
+  const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(d);
+  const g = (t) => p.find(x => x.type === t).value;
+  return { fecha: `${g('year')}-${g('month')}-${g('day')}`, min: (+g('hour')) * 60 + (+g('minute')) };
+}
+function aTiempo(c, m){
+  if (!m || !m.hora_limite || !c.created_at) return false;
+  const b = enBogota(new Date(c.created_at));
+  return b.fecha === c.fecha && b.min <= minDe(m.hora_limite);
+}
+const diaSemana = () => new Date().getDay();
+const misionesHoy = () => state.misiones.filter(m => !m.dias || m.dias.includes(diaSemana()));
+const pasoLaHora = (m) => !!m.hora_limite && enBogota(new Date()).min > minDe(m.hora_limite);
+
 /* ============ CÁLCULOS ============ */
 function calcXp(rows){
-  return rows.reduce((acc, c) => acc + (state.misiones.find(x => x.id === c.mision_id)?.xp || 0), 0);
+  return rows.reduce((acc, c) => {
+    const m = state.misiones.find(x => x.id === c.mision_id);
+    return acc + (m?.xp || 0) + (aTiempo(c, m) ? BONO_A_TIEMPO : 0);
+  }, 0);
 }
 function calcRacha(rows){
   const dias = new Set(rows.map(c => c.fecha));
@@ -398,6 +472,7 @@ async function entrar(id){
   try { await loadCompletados(id); }
   catch(e){ console.error(e); toast('No pude cargar tus misiones. Revisa tu internet.', true); return; }
   show('v-play'); renderPlay();
+  resincronizarPush();
 }
 
 /* ============ PANTALLA: JUGAR ============ */
@@ -409,6 +484,8 @@ function renderPlay(){
   const racha = calcRacha(state.completados);
   state.nivel = nivel; state.racha = racha;
   const hoyDone = new Map(state.completados.filter(c=>c.fecha===hoy()).map(c=>[c.mision_id,c]));
+  const lista = misionesHoy();
+  const hechasHoy = lista.filter(m => hoyDone.has(m.id)).length;
 
   $('#topbar').style.setProperty('--c', n.color);
   $('#topbar').innerHTML = `
@@ -426,7 +503,7 @@ function renderPlay(){
     </div>
     <div class="stats">
       <div class="stat s1">RACHA<b>${racha} ${racha === 1 ? 'día' : 'días'}</b></div>
-      <div class="stat s2">HOY<b>${hoyDone.size}/${state.misiones.length}</b></div>
+      <div class="stat s2">HOY<b>${hechasHoy}/${lista.length}</b></div>
     </div>
     <button class="switch" id="switch" style="align-self:flex-start">← CAMBIAR PILOTO</button>`;
   $('#switch').onclick = async () => {
@@ -440,8 +517,15 @@ function renderPlay(){
     <div class="l">// MENSAJE DE DANIEL</div>
     <p>${esc(MENSAJES_DANIEL[n.nombre] || MENSAJE_GENERAL)}</p>`;
 
-  $('#missions').innerHTML = state.misiones.map(m => {
+  $('#missions').innerHTML = lista.map(m => {
     const done = hoyDone.has(m.id);
+    const reg = hoyDone.get(m.id);
+    let chipHora = '';
+    if (done){ if (aTiempo(reg, m)) chipHora = `<span class="chip bono">⚡ a tiempo +${BONO_A_TIEMPO}</span>`; }
+    else if (m.hora_limite) chipHora = pasoLaHora(m)
+      ? `<span class="chip tarde">⏰ pasó las ${esc(fmtHora(m.hora_limite))}</span>`
+      : `<span class="chip hora">⏰ antes de ${esc(fmtHora(m.hora_limite))} · +${BONO_A_TIEMPO} XP</span>`;
+    else if (m.limite_nota && !done) chipHora = `<span class="chip hora">🕒 ${esc(m.limite_nota)}</span>`;
     return `
     <button class="mission ${done?'done':''}" style="--c:${esc(n.color)}" data-m="${m.id}" aria-pressed="${done}"
       aria-label="${esc(m.nombre)}${done ? ', lista. Toca para desmarcar' : ''}">
@@ -451,6 +535,7 @@ function renderPlay(){
       <span class="chips">
         <span class="chip xp">+${m.xp} XP</span>
         ${m.requiere_foto ? '<span class="chip cam">📸 pide foto</span>' : ''}
+        ${chipHora}
       </span>
       <span class="tick">${CHECK}</span>
     </button>`;
@@ -466,6 +551,9 @@ function renderPlay(){
   const stats = { total: state.completados.length, racha, nivel, porMision };
   renderGaitEntry();
   renderEstudioEntry();
+  if (typeof renderLabEntry === 'function') renderLabEntry();
+  renderHorario();
+  renderNotifEntry();
   $('#badges').innerHTML = INSIGNIAS.map(b => {
     const on = b.cond(stats);
     return `<div class="badge ${on?'on':''}"><div class="bi">${b.icon}</div><div class="bn">${esc(b.nombre)}</div></div>`;
@@ -511,7 +599,8 @@ async function registrar(m, fotoUrl){
   renderPlay();
   lanzarConfetti(n.color);
   vibrar(40);
-  toast(`+${m.xp} XP · ${m.nombre} lista. ${animo()}`);
+  const bono = aTiempo(data, m);
+  toast(bono ? `+${m.xp + BONO_A_TIEMPO} XP · ${m.nombre} lista y a tiempo ⚡ ${animo()}` : `+${m.xp} XP · ${m.nombre} lista. ${animo()}`);
   checkDiaCompleto();
 }
 
@@ -519,7 +608,8 @@ async function registrar(m, fotoUrl){
 function checkDiaCompleto(){
   const n = state.nino;
   const hechas = new Set(state.completados.filter(c => c.fecha === hoy()).map(c => c.mision_id));
-  if (!state.misiones.length || !state.misiones.every(m => hechas.has(m.id))) return;
+  const lista = misionesHoy();
+  if (!lista.length || !lista.every(m => hechas.has(m.id))) return;
   const key = `dia_${n.id}_${hoy()}`;
   if (lsGet(key)) return;
   lsSet(key, '1');
@@ -565,6 +655,121 @@ function lanzarConfetti(color){
   confetti({ particleCount: 140, spread: 80, origin: { y: .45 }, colors });
   setTimeout(()=> confetti({ particleCount: 60, angle: 60, spread: 55, origin: { x: 0 }, colors }), 220);
   setTimeout(()=> confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1 }, colors }), 220);
+}
+
+/* ============ HORARIO DEL DÍA ============ */
+function renderHorario(){
+  const box = $('#horario-entry'); if (!box || !state.nino) return;
+  const hechas = new Map(state.completados.filter(c => c.fecha === hoy()).map(c => [c.mision_id, c]));
+  const filas = misionesHoy().filter(m => m.hora_limite).sort((a, b) => minDe(a.hora_limite) - minDe(b.hora_limite)).map(m => {
+    const reg = hechas.get(m.id);
+    const e = reg ? (aTiempo(reg, m) ? '<span class="e ok">✅ a tiempo</span>' : '<span class="e ok">✅ lista</span>')
+      : pasoLaHora(m) ? '<span class="e tarde">⏰ tarde</span>' : '<span class="e pend">pendiente</span>';
+    return `<div class="fila"><span class="h">${esc(fmtHora(m.hora_limite))}</span><span>${esc(m.emoji)} ${esc(m.nombre)}</span>${e}</div>`;
+  }).join('');
+  const dia = diaSemana();
+  const colegio = dia >= 1 && dia <= 5;
+  const aseo = misionesHoy().filter(m => !m.hora_limite && m.limite_nota).map(m => `${esc(m.emoji)} ${esc(m.nombre)}`).join(' · ');
+  if (!filas && !aseo){ box.innerHTML = ''; return; }
+  box.innerHTML = `
+    <div class="reloj">
+      <div class="l">// RELOJ DEL DÍA</div>
+      ${filas}
+      ${aseo ? `<div class="nota">🕒 Durante el día: ${aseo}</div>` : ''}
+      ${colegio ? '<div class="nota">🎒 Hoy tienes colegio en la tarde: deja listo lo de la mañana antes de salir.</div>' : ''}
+    </div>`;
+}
+
+/* ============ NOTIFICACIONES (Web Push) ============ */
+const VAPID_PUBLICA = 'BAXHzwCKrzVG0J4YVgP554Hb5Qwr7lCCinnZyidZd8J6o8BPzylwc8fBZEgHOo1OEAGlphRq4nPWIW6FkzmD1nY';
+function llaveBytes(b64){
+  const pad = '='.repeat((4 - b64.length % 4) % 4);
+  const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
+}
+const pushSoportado = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const esIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+async function pushEstado(){
+  if (!pushSoportado()) return 'nosoporta';
+  if (Notification.permission === 'denied') return 'bloqueado';
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub && Notification.permission === 'granted') return 'activo';
+  } catch(e){}
+  return 'inactivo';
+}
+async function activarPush(rol, pin){
+  const permiso = await Notification.requestPermission();
+  if (permiso !== 'granted') throw new Error('permiso');
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: llaveBytes(VAPID_PUBLICA) });
+  const j = sub.toJSON();
+  const { error } = await sb.rpc('registrar_push', {
+    p_rol: rol, p_nino: rol === 'nino' ? state.nino.id : null,
+    p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_pin: pin || null
+  });
+  if (error) throw error;
+}
+async function probarPush(titulo, cuerpo){
+  const reg = await navigator.serviceWorker.ready;
+  await reg.showNotification(titulo, { body: cuerpo, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'prueba' });
+}
+async function renderNotifEntry(){
+  const box = $('#notif-entry'); if (!box || !state.nino) return;
+  const nino = state.nino;
+  const est = await pushEstado();
+  if (state.nino !== nino) return;                       // cambió de piloto mientras tanto
+  let html = '';
+  if (est === 'nosoporta'){
+    html = (esIOS() && !esApp())
+      ? '<p>Para recibir recordatorios en iPhone, primero <b>instala la app</b> (Compartir → Agregar a pantalla de inicio) y ábrela desde su ícono.</p>'
+      : '';
+  } else if (est === 'bloqueado'){
+    html = '<p>Las notificaciones están <b>bloqueadas</b>. Para recibir los recordatorios, actívalas en los ajustes del navegador o de la app.</p>';
+  } else if (est === 'inactivo'){
+    html = `<p>Activa los recordatorios y te aviso la hora de la ducha, la cama y el uniforme, como si fuera Duolingo. 🦉</p>
+      <div class="row"><button class="btn" id="push-on">Activar recordatorios</button></div>`;
+  } else {
+    html = `<p>🔔 <b>Recordatorios activos</b> en este celular.</p>
+      <div class="row"><button class="btn ghost" id="push-test">Probar aviso</button></div>`;
+  }
+  if (!html){ box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="notif"><div class="t">// RECORDATORIOS</div>${html}</div>`;
+  const on = $('#push-on'), test = $('#push-test');
+  if (on) on.onclick = async () => {
+    on.disabled = true;
+    try { await activarPush('nino'); toast('¡Listo! Te avisaré a tiempo 🔔'); await probarPush('🔔 ¡Funciona, ' + nino.nombre + '!', 'Así te llegarán los avisos de tus misiones.'); }
+    catch(e){ console.error(e); toast(e.message === 'permiso' ? 'No diste permiso para avisarte' : 'No se pudo activar. Intenta otra vez.', true); }
+    renderNotifEntry();
+  };
+  if (test) test.onclick = () => probarPush('🔔 Aviso de prueba', nino.nombre + ', así te llegarán tus recordatorios.').catch(() => toast('No se pudo mostrar el aviso', true));
+}
+// Si ya había dado permiso, deja el celular registrado al piloto actual (por si cambió de celular o de piloto)
+async function resincronizarPush(){
+  try {
+    if (!state.nino || (await pushEstado()) !== 'activo') return;
+    await activarPush('nino');
+  } catch(e){ console.error(e); }
+}
+async function renderPanelPush(){
+  const box = $('#panel-push'); if (!box) return;
+  const est = await pushEstado();
+  let html;
+  if (est === 'nosoporta') html = '<p>Este navegador no puede recibir avisos' + (esIOS() && !esApp() ? '. En iPhone instala primero la app.' : '.') + '</p>';
+  else if (est === 'bloqueado') html = '<p>Las notificaciones están bloqueadas en este navegador.</p>';
+  else if (est === 'activo') html = '<p>🔔 Este celular ya recibe tus alertas cuando alguno se pase de hora.</p><div class="row"><button class="btn ghost" id="pp-test">Probar aviso</button></div>';
+  else html = '<p>Activa esto en <b>tu</b> celular y te aviso si alguno se pasa de la hora (ducha, cama, uniforme, aseo).</p><div class="row"><button class="btn" id="pp-on">Avisarme a mí</button></div>';
+  box.innerHTML = `<div class="notif"><div class="t">// ALERTAS PARA DANIEL</div>${html}</div>`;
+  const on = $('#pp-on'), test = $('#pp-test');
+  if (on) on.onclick = async () => {
+    on.disabled = true;
+    try { await activarPush('padre', state.pin); toast('Listo, te avisaré 🔔'); await probarPush('🔔 Alertas de Daniel', 'Aquí te llegarán los avisos de los hermanitos.'); }
+    catch(e){ console.error(e); toast(e.message === 'permiso' ? 'No diste permiso' : 'No se pudo activar (¿el PIN es el correcto?)', true); }
+    renderPanelPush();
+  };
+  if (test) test.onclick = () => probarPush('🔔 Alertas de Daniel', 'Prueba correcta.').catch(() => toast('No se pudo mostrar el aviso', true));
 }
 
 /* ============ INSTALAR COMO APP ============ */
@@ -740,6 +945,7 @@ async function loadGaitSemana(){
 /* ============ CENTRO DE MANDO (Daniel) ============ */
 $('#pin-go').onclick = async () => {
   if ($('#pin').value !== PANEL_PIN){ toast('PIN incorrecto', true); $('#pin').value=''; return; }
+  state.pin = $('#pin').value;
   $('#panel-gate').classList.add('hidden');
   $('#panel-body').classList.remove('hidden');
   await renderPanel();
@@ -764,7 +970,7 @@ async function renderPanel(){
     return { n, xp, semana: mine.length, dias: dias.size, hoy: hoyN, mine };
   });
 
-  const total = state.misiones.length;
+  const total = misionesHoy().length;
   const cards = resumen.map(({n, xp, dias, hoy:h, mine}) => {
     const pct = Math.round((h / total) * 100);
     const heat = [...Array(7)].map((_,i) => {
@@ -813,13 +1019,16 @@ async function renderPanel(){
       <td>${r.foto_url ? '📸' : '—'}</td></tr>`;
   }).join('');
 
+  const labHtml = (typeof renderPanelLab === 'function') ? await renderPanelLab() : '';
   $('#panel-body').innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0 6px">
       <div style="color:var(--muted);font-family:var(--m);font-size:12px">Semana del ${esc(desde.toLocaleDateString('es-CO',{day:'numeric',month:'short'}))} a hoy</div>
       <button class="btn ghost" id="panel-exit">Salir</button>
     </div>
     ${cards}
+    <div id="panel-push"></div>
     ${galeria}
+    ${labHtml}
     <div class="panel-card">
       <div class="section-h" style="--c:var(--amber);margin-top:0">// Bitácora</div>
       <div style="overflow-x:auto"><table style="min-width:420px">
@@ -827,12 +1036,13 @@ async function renderPanel(){
         <tbody>${bitacora || '<tr><td colspan="5" style="color:var(--muted)">Todavía no hay misiones esta semana</td></tr>'}</tbody>
       </table></div>
     </div>`;
-  $('#panel-exit').onclick = () => { show('v-pick'); renderPick(); $('#panel-gate').classList.remove('hidden'); $('#panel-body').classList.add('hidden'); $('#pin').value=''; };
+  renderPanelPush();
+  $('#panel-exit').onclick = () => { show('v-pick'); renderPick(); $('#panel-gate').classList.remove('hidden'); $('#panel-body').classList.add('hidden'); $('#pin').value=''; state.pin=null; };
 }
 
 /* ============ ARRANQUE ============ */
 (async function init(){
-  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 5 · Misiones OS';
+  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 6 · Misiones OS';
   if (location.hash === '#panel'){ show('v-panel'); }
   else show('v-pick');
   try{
@@ -849,5 +1059,6 @@ async function renderPanel(){
 })();
 </script>
 <script src="estudio.js"></script>
+<script src="laboratorio.js"></script>
 </body>
 </html>

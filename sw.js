@@ -1,7 +1,7 @@
 // Service worker: permite abrir la app aunque no haya internet y se actualiza al conectarse.
-const CACHE = 'misiones-v5';
+const CACHE = 'misiones-v6';
 const ASSETS = [
-  './', './index.html', './estudio.js', './manifest.webmanifest',
+  './', './index.html', './estudio.js', './laboratorio.js', './manifest.webmanifest',
   './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'
 ];
 
@@ -29,5 +29,30 @@ self.addEventListener('fetch', (e) => {
         return res;
       })
       .catch(() => caches.match(e.request))
+  );
+});
+
+// ===== Notificaciones (Web Push) =====
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (err) { d = { title: 'Misiones', body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Misiones', {
+    body: d.body || '',
+    icon: 'icon-192.png',
+    badge: 'icon-192.png',
+    tag: d.tag || 'misiones',
+    renotify: true,
+    data: { url: d.url || './' },
+  }));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const destino = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((lista) => {
+      for (const c of lista) { if ('focus' in c) return c.focus(); }
+      return self.clients.openWindow(destino);
+    })
   );
 });
