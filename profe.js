@@ -47,6 +47,9 @@ const GLOSARIO = [
   ['hipótesis', 'Lo que crees que va a pasar, ANTES de probar.'], ['algoritmo', 'Una lista de pasos en orden para lograr algo.'],
   ['copia de seguridad', 'Una copia de tus archivos en otro lugar, por si se pierde algo.'], ['respaldo', 'Una copia de tus archivos en otro lugar, por si se pierde algo.'],
   ['actualizaciones', 'Mejoras que tapan fallas y protegen el equipo.'], ['formatear', 'Borrar todo el disco. Es el último recurso. ¡Nunca sin permiso!'],
+  ['entrada', 'Lo que TÚ le das al computador: escribir, mover el mouse, hablar al micrófono.'], ['salida', 'Lo que el computador TE muestra: imagen, sonido o papel.'],
+  ['usb', 'Una memoria pequeña que se conecta al computador para llevar o guardar archivos.'], ['nube', 'Un lugar en internet donde guardas archivos para no perderlos.'],
+  ['wi‑fi', 'Internet sin cables.'], ['portátil', 'Un computador que se puede llevar, con pantalla y teclado juntos.'], ['pad táctil', 'La parte plana del portátil que hace de mouse.'],
   ['multiplicar', 'Sumar el mismo número varias veces. 3 × 4 es 4 + 4 + 4.'], ['dividir', 'Repartir en partes iguales.'],
   ['fracción', 'Una parte de algo entero. 1/4 es una de cuatro partes iguales.'], ['centena', 'Un grupo de 100.'], ['decena', 'Un grupo de 10.'],
 ];
