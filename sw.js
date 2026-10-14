@@ -1,6 +1,9 @@
 // Service worker: permite abrir la app aunque no haya internet y se actualiza al conectarse.
-const CACHE = 'misiones-v4';
-const ASSETS = ['./', './index.html', './estudio.js', './manifest.webmanifest', './icon.svg'];
+const CACHE = 'misiones-v5';
+const ASSETS = [
+  './', './index.html', './estudio.js', './manifest.webmanifest',
+  './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'
+];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

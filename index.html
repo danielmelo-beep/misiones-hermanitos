@@ -4,232 +4,257 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Misiones · Frank & Valentina</title>
-<meta name="theme-color" content="#0b0620" />
+<meta name="description" content="Las misiones de Frank y Valentina" />
+<meta name="theme-color" content="#070A12" />
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
-<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <meta name="apple-mobile-web-app-title" content="Misiones" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
   :root{
-    --bg:#0b0620; --panel:#160c33; --ink:#f6f1ff; --muted:#a79cc9;
-    --cyan:#00e5ff; --pink:#ff3d7f; --yellow:#ffd60a; --lime:#b6ff3b; --violet:#9d5cff;
+    --bg:#070A12; --panel:#0D1322; --panel2:#0A101D; --line:#1C2A44; --line2:#2A3550;
+    --ink:#E8F1FF; --muted:#9FB2D3; --dim:#7C93B8;
+    --cyan:#22E4FF; --pink:#FF3D8B; --amber:#FFB020; --lime:#B8FF3D; --violet:#A98BFF;
+    --yellow:#FFB020;
+    --f:'Chakra Petch',system-ui,sans-serif; --m:'JetBrains Mono',ui-monospace,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{min-height:100%}
+  html{-webkit-text-size-adjust:100%}
   body{
-    font-family:'Baloo 2',system-ui,sans-serif; color:var(--ink);
-    background:
-      radial-gradient(1000px 600px at 10% -10%, #3b0d6b 0%, transparent 60%),
-      radial-gradient(900px 700px at 110% 10%, #00434f 0%, transparent 60%),
-      radial-gradient(800px 800px at 50% 120%, #5a0b3a 0%, transparent 60%),
-      var(--bg);
-    background-attachment:fixed; overflow-x:hidden;
+    font-family:var(--f); color:var(--ink); min-height:100vh; overflow-x:hidden;
+    background-color:var(--bg);
+    background-image:linear-gradient(#12203a55 1px,transparent 1px),linear-gradient(90deg,#12203a55 1px,transparent 1px);
+    background-size:32px 32px;
   }
-  /* Estrellas de fondo */
-  body::before{
-    content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
-    background-image:
-      radial-gradient(2px 2px at 20% 30%, #fff8, transparent),
-      radial-gradient(2px 2px at 70% 60%, #0ff8, transparent),
-      radial-gradient(1.5px 1.5px at 40% 80%, #ff8, transparent),
-      radial-gradient(2px 2px at 85% 20%, #f0f8, transparent),
-      radial-gradient(1.5px 1.5px at 10% 90%, #fff8, transparent);
-    background-size:300px 300px; animation:twinkle 6s linear infinite alternate;
-  }
-  @keyframes twinkle{from{background-position:0 0}to{background-position:60px -40px}}
-  .app{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:18px 16px 60px}
+  button{font-family:inherit;color:inherit;cursor:pointer;background:none;border:0}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+  .hidden{display:none !important}
+  .photo-input{display:none}
+  .app{position:relative;max-width:760px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 16px calc(70px + env(safe-area-inset-bottom))}
+  .bungee{font-family:var(--f);font-weight:700;letter-spacing:.02em}
 
-  h1,h2,.bungee{font-family:'Bungee',cursive;letter-spacing:.5px}
-  .brand{text-align:center;padding:14px 0 6px}
-  .brand .kicker{display:inline-block;font-weight:800;font-size:13px;letter-spacing:4px;
-    color:var(--yellow);background:#ffd60a22;border:2px solid var(--yellow);padding:4px 12px;border-radius:99px}
-  .brand h1{font-size:clamp(34px,8vw,64px);line-height:1;margin-top:12px;
-    background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink),var(--yellow));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    filter:drop-shadow(0 0 18px #9d5cff66)}
-  .brand p{color:var(--muted);font-weight:700;margin-top:8px}
+  /* barra de sistema */
+  .sys{display:flex;justify-content:space-between;align-items:center;font-family:var(--m);font-size:11px;letter-spacing:.14em;color:var(--dim);min-height:36px}
+  .live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lime);margin-right:8px;animation:pulse 1.8s infinite}
+  @keyframes pulse{50%{opacity:.35}}
 
-  /* Pantalla de selección */
-  .pick-title{text-align:center;font-family:'Bungee';font-size:22px;margin:26px 0 18px;color:var(--lime)}
-  .pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .kick{font-family:var(--m);font-size:12px;letter-spacing:.2em;color:var(--cyan)}
+  .pick-head{margin:16px 0 20px}
+  .pick-head h1{font-size:clamp(40px,11vw,60px);line-height:1;font-weight:700;margin-top:8px;letter-spacing:-.01em}
+  .pick-head p{color:var(--muted);font-weight:500;margin-top:10px;font-size:16px}
+
+  /* selección de piloto */
+  .pick-grid{display:grid;gap:14px;grid-template-columns:1fr 1fr}
   @media (max-width:560px){.pick-grid{grid-template-columns:1fr}}
-  .hero{
-    position:relative;border-radius:28px;padding:26px 16px 22px;text-align:center;cursor:pointer;
-    background:linear-gradient(180deg,var(--panel),#0e0626);
-    border:3px solid var(--c);box-shadow:0 0 0 0 var(--c),0 14px 40px -10px var(--c);
-    transition:transform .2s, box-shadow .2s; overflow:hidden;
-  }
-  .hero:hover,.hero:active{transform:translateY(-4px) rotate(-.5deg);box-shadow:0 0 0 6px #ffffff10,0 20px 50px -8px var(--c)}
-  .hero .av{font-size:86px;line-height:1;filter:drop-shadow(0 6px 0 #0008);animation:bob 2.4s ease-in-out infinite}
-  @keyframes bob{50%{transform:translateY(-8px)}}
-  .hero .nm{font-family:'Bungee';font-size:28px;color:var(--c);margin-top:12px}
-  .hero .sub{color:var(--muted);font-weight:700}
-  .hero .tag{position:absolute;top:12px;right:12px;background:var(--c);color:#0b0620;
-    font-weight:800;font-size:12px;padding:3px 10px;border-radius:99px}
+  .hero{position:relative;display:flex;align-items:center;gap:14px;text-align:left;width:100%;padding:16px 14px 16px 20px;
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;transition:transform .15s,border-color .2s}
+  .hero::before{content:"";position:absolute;left:-1px;top:14px;bottom:14px;width:3px;background:var(--c);border-radius:2px}
+  .hero:hover{border-color:var(--c);transform:translateY(-2px)}
+  .hero:active{transform:scale(.98)}
+  .ring{position:relative;width:84px;height:84px;flex:none}
+  .ring svg{position:absolute;inset:0}
+  .ring .av{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:38px}
+  .hinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+  .hinfo .nm{font-size:24px;font-weight:700;letter-spacing:.02em}
+  .hinfo .sub{font-family:var(--m);font-size:12px;color:var(--muted)}
+  .hinfo .st{font-family:var(--m);font-size:12px;color:var(--amber)}
+  .chev{flex:none}
 
-  /* Barra superior del niño */
-  .topbar{display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,#1e0f44,#14082e);
-    border:3px solid var(--c);border-radius:24px;padding:14px 16px;box-shadow:0 10px 30px -10px var(--c)}
-  .topbar .av{font-size:50px;filter:drop-shadow(0 4px 0 #0008)}
-  .topbar .info{flex:1;min-width:0}
-  .topbar .hi{font-family:'Bungee';font-size:20px;color:var(--c)}
-  .lvl{font-weight:800;font-size:14px;color:var(--yellow)}
-  .xpbar{height:16px;border-radius:99px;background:#0a0420;border:2px solid #ffffff22;overflow:hidden;margin-top:6px}
-  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--yellow),var(--pink),var(--violet));
-    border-radius:99px;transition:width 1s cubic-bezier(.2,.9,.2,1);box-shadow:0 0 14px var(--pink)}
-  .streak{text-align:center;background:#ff7a0022;border:2px solid #ff7a00;border-radius:18px;padding:8px 12px;min-width:84px}
-  .streak b{display:block;font-family:'Bungee';font-size:24px;color:#ff9a2e}
-  .streak span{font-weight:800;font-size:12px;color:#ffbb7a}
-  .switch{background:none;border:2px solid #ffffff33;color:var(--muted);font-family:'Baloo 2';font-weight:800;
-    border-radius:14px;padding:8px 10px;cursor:pointer}
-  .switch:hover{color:var(--ink);border-color:#fff}
+  /* instalar */
+  .install{margin-top:18px;border:1px dashed var(--line2);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .install .t{font-family:var(--m);font-size:12px;letter-spacing:.14em;color:var(--lime)}
+  .install p{font-size:15px;font-weight:500;color:var(--muted);line-height:1.4}
+  .install p b{color:var(--ink)}
+  .install .row{display:flex;gap:10px;flex-wrap:wrap}
 
-  .section-h{font-family:'Bungee';font-size:18px;margin:22px 0 12px;display:flex;align-items:center;gap:10px}
-  .section-h::after{content:"";flex:1;height:3px;background:linear-gradient(90deg,var(--c),transparent);border-radius:9px}
+  /* barra del piloto */
+  .topbar{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:14px;margin-top:6px}
+  .topbar::before{content:"";position:absolute;left:-1px;top:14px;bottom:14px;width:3px;background:var(--c);border-radius:2px}
+  .tb-row{display:flex;align-items:center;gap:14px}
+  .tb-row .av{font-size:46px;line-height:1;flex:none}
+  .tb-row .info{flex:1;min-width:0}
+  .tb-row .kk{font-family:var(--m);font-size:11px;letter-spacing:.16em;color:var(--c)}
+  .tb-row .hi{font-size:32px;font-weight:700;line-height:1.05}
+  .lv{text-align:right}
+  .lv small{display:block;font-family:var(--m);font-size:11px;letter-spacing:.14em;color:var(--dim)}
+  .lv b{font-size:38px;line-height:1;color:var(--c)}
+  .switch{border:1px solid var(--line2);border-radius:6px;padding:0 12px;min-height:44px;font-family:var(--m);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+  .switch:hover{color:var(--ink);border-color:var(--muted)}
+  .xprow{display:flex;justify-content:space-between;font-family:var(--m);font-size:12px;color:var(--muted)}
+  .xpbar{height:10px;background:#12203a;border-radius:2px;overflow:hidden;margin-top:6px}
+  .xpfill{height:100%;width:0;background:var(--c);transition:width 1s cubic-bezier(.2,.9,.2,1)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{border:1px solid var(--line2);border-radius:4px;padding:10px;font-family:var(--m);font-size:11px;letter-spacing:.1em}
+  .stat b{display:block;font-family:var(--f);font-size:24px;font-weight:700;letter-spacing:0;margin-top:2px}
+  .stat.s1{color:var(--amber)} .stat.s2{color:var(--lime)}
 
-  /* Misiones */
-  .missions{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
-  .mission{
-    position:relative;border-radius:24px;padding:18px;cursor:pointer;min-height:176px;
-    background:linear-gradient(160deg,#211150,#120830);border:3px solid #ffffff1f;
-    transition:transform .15s, border-color .2s, box-shadow .2s; overflow:hidden;
-  }
-  .mission:hover{transform:translateY(-3px);border-color:var(--c)}
-  .mission:active{transform:scale(.97)}
-  .mission .em{font-size:52px;line-height:1;filter:drop-shadow(0 4px 0 #0008)}
-  .mission h3{font-family:'Bungee';font-size:16px;margin-top:12px;line-height:1.2}
-  .mission p{color:var(--muted);font-weight:600;font-size:14px;margin-top:6px}
-  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
-  .chip{font-weight:800;font-size:12px;padding:3px 9px;border-radius:99px;background:#ffffff14}
-  .chip.xp{background:var(--yellow);color:#2a1d00}
-  .chip.cam{background:var(--cyan);color:#00222a}
-  .mission.done{border-color:var(--lime);box-shadow:0 0 22px -6px var(--lime);background:linear-gradient(160deg,#173a1c,#0d2411)}
-  .mission.done .em{filter:grayscale(.2) drop-shadow(0 4px 0 #0008)}
-  .stamp{position:absolute;top:14px;right:-38px;transform:rotate(35deg);background:var(--lime);color:#0b2a0a;
-    font-family:'Bungee';font-size:12px;padding:4px 44px;letter-spacing:1px}
-  .mission.busy{opacity:.6;pointer-events:none}
-  .spin{position:absolute;right:14px;bottom:14px;font-size:24px;animation:spin 1s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
+  .carta{margin-top:12px;border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:8px;background:var(--panel2);padding:14px 16px}
+  .carta .l{font-family:var(--m);font-size:11px;letter-spacing:.16em;color:var(--pink)}
+  .carta p{margin-top:6px;font-size:16px;font-weight:500;line-height:1.45;color:var(--ink)}
 
-  /* Insignias */
-  .badges{display:flex;gap:12px;flex-wrap:wrap}
-  .badge{width:118px;text-align:center;padding:12px 8px;border-radius:20px;background:#ffffff0c;border:2px dashed #ffffff26}
-  .badge.on{border:2px solid var(--yellow);background:linear-gradient(160deg,#3a2c00,#1d1600);box-shadow:0 0 18px -4px var(--yellow)}
-  .badge .bi{font-size:34px}
-  .badge .bn{font-family:'Bungee';font-size:11px;margin-top:6px;line-height:1.2}
-  .badge:not(.on){filter:grayscale(1);opacity:.45}
+  .section-h{font-family:var(--m);font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--c,var(--cyan));margin:26px 0 12px;display:flex;align-items:center;gap:10px}
+  .section-h::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--c,var(--cyan)),transparent);opacity:.6}
 
-  .footer{text-align:center;color:var(--muted);font-weight:700;margin-top:34px;font-size:13px}
+  /* misiones (también las usa estudio.js y el módulo de marcha) */
+  .missions{display:grid;gap:10px;grid-template-columns:1fr}
+  @media (min-width:640px){.missions{grid-template-columns:1fr 1fr}}
+  .mission{position:relative;display:grid;grid-template-columns:52px 1fr auto;column-gap:14px;align-items:center;text-align:left;width:100%;
+    min-height:84px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    transition:border-color .2s,background .2s,transform .12s}
+  .mission:hover{border-color:var(--c,var(--cyan))}
+  .mission:active{transform:scale(.985)}
+  .mission .em{grid-column:1;grid-row:1 / span 3;font-size:36px;line-height:1;text-align:center}
+  .mission h3,.mission .t{grid-column:2;display:block;font-size:17px;font-weight:600;line-height:1.15}
+  .mission p,.mission .d{grid-column:2;display:block;color:var(--muted);font-weight:500;font-size:13px;margin-top:3px;line-height:1.3}
+  .mission .chips{grid-column:2;display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+  .chip{font-family:var(--m);font-size:11px;letter-spacing:.06em;padding:2px 8px;border:1px solid var(--line2);border-radius:99px;color:var(--muted)}
+  .chip.xp{color:var(--amber);border-color:#FFB02055}
+  .chip.cam{color:var(--cyan);border-color:#22E4FF55}
+  .mission .tick{grid-column:3;grid-row:1 / span 3;width:48px;height:48px;border-radius:6px;border:1.5px solid #3A4C70;
+    display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s}
+  .mission .tick svg{opacity:0;transition:opacity .15s}
+  .mission.done{border-color:var(--lime);background:#0E1D14}
+  .mission.done .tick{background:var(--lime);border-color:var(--lime)}
+  .mission.done .tick svg{opacity:1}
 
-  /* Toast */
-  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);
-    background:var(--ink);color:#0b0620;font-weight:800;padding:12px 18px;border-radius:16px;
-    box-shadow:0 12px 30px #0009;transition:transform .35s cubic-bezier(.2,1.2,.3,1);z-index:50;max-width:92vw;text-align:center}
+  /* insignias */
+  .badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px}
+  .badge{border:1px solid var(--line);border-radius:8px;padding:12px 6px;text-align:center;background:var(--panel)}
+  .badge.on{border-color:var(--amber);box-shadow:inset 0 0 0 1px #FFB02033}
+  .badge:not(.on){opacity:.45;filter:grayscale(1)}
+  .badge .bi{font-size:30px;line-height:1}
+  .badge .bn{font-size:11px;font-weight:600;margin-top:6px;line-height:1.15}
+
+  .footer{text-align:center;color:var(--dim);font-family:var(--m);font-size:11px;letter-spacing:.08em;margin-top:34px;line-height:1.6}
+
+  /* aviso */
+  .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(160%);
+    background:var(--ink);color:#06101A;font-weight:600;padding:12px 18px;border-radius:8px;
+    box-shadow:0 12px 30px #000a;transition:transform .35s cubic-bezier(.2,1.2,.3,1);z-index:60;max-width:92vw;text-align:center}
   .toast.show{transform:translateX(-50%) translateY(0)}
   .toast.err{background:var(--pink);color:#fff}
 
-  /* Panel de padres */
-  .panel-card{background:var(--panel);border:2px solid #ffffff1a;border-radius:24px;padding:18px;margin-top:14px}
-  table{width:100%;border-collapse:collapse;font-weight:700}
-  th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #ffffff14;font-size:14px}
-  th{color:var(--muted);font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase}
-  .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:middle}
-  .heat{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
-  .heat div{aspect-ratio:1;border-radius:8px;background:#ffffff10;font-size:10px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px;color:#fff9}
-  .input{width:100%;padding:14px;border-radius:14px;border:2px solid #ffffff33;background:#0a0420;color:var(--ink);
-    font-family:'Baloo 2';font-size:20px;font-weight:800;text-align:center;letter-spacing:6px}
-  .btn{background:var(--cyan);color:#00222a;border:0;border-radius:14px;padding:12px 18px;font-family:'Bungee';font-size:14px;cursor:pointer}
-  .btn.ghost{background:none;color:var(--muted);border:2px solid #ffffff33;font-family:'Baloo 2';font-weight:800}
-  /* Módulo de marcha */
-  .gait-warn{font-weight:800;font-size:13px;color:#ffbb7a;background:#ff7a0018;border:2px dashed #ff7a00;border-radius:14px;padding:10px 12px;margin-bottom:14px}
+  /* celebración de día completo */
+  .celebra{position:fixed;inset:0;z-index:100;background:#070A12f2;display:flex;align-items:center;justify-content:center;padding:20px}
+  .celebra .card{max-width:420px;width:100%;background:var(--panel);border:1px solid var(--c);border-radius:10px;padding:26px 22px;text-align:center;
+    box-shadow:0 0 40px -10px var(--c)}
+  .celebra .big{font-size:64px;line-height:1}
+  .celebra h2{font-size:30px;font-weight:700;margin-top:10px;color:var(--c);line-height:1.05}
+  .celebra p{margin-top:10px;font-weight:500;color:var(--muted);line-height:1.45}
+  .celebra .firma{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink)}
+
+  /* panel de Daniel */
+  .panel-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;margin-top:14px}
+  table{width:100%;border-collapse:collapse;font-weight:500}
+  th,td{padding:10px 8px;text-align:left;border-top:1px solid var(--line);font-size:14px}
+  th{border-top:0;color:var(--dim);font-family:var(--m);font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .heat{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+  .heat div{aspect-ratio:1;border-radius:4px;border:1px solid var(--line);background:#ffffff08;font-family:var(--m);font-size:11px;display:flex;align-items:center;justify-content:center;color:#fffc}
+  .input{width:100%;padding:14px;border-radius:6px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);
+    font-family:var(--m);font-size:22px;font-weight:700;text-align:center;letter-spacing:6px}
+  .btn{background:var(--cyan);color:#04141A;border-radius:6px;padding:0 18px;min-height:48px;font-family:var(--f);font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.ghost{background:none;color:var(--muted);border:1px solid var(--line2);font-weight:600}
+
+  /* módulo de marcha */
+  .gait-warn{font-weight:500;font-size:14px;color:#FFD08A;background:#FFB02012;border:1px dashed var(--amber);border-radius:6px;padding:10px 12px;margin-bottom:14px;line-height:1.4}
   .gait-steps{display:flex;gap:6px;justify-content:center;margin:6px 0 14px;flex-wrap:wrap}
   .gait-steps i{width:12px;height:12px;border-radius:50%;background:#ffffff22;display:block}
-  .gait-steps i.ok{background:var(--lime);box-shadow:0 0 8px var(--lime)}
+  .gait-steps i.ok{background:var(--lime)}
   .gait-steps i.now{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
-  /* Estudio: ruta, quiz, tablas y robot */
-  .ruta{display:flex;flex-direction:column;gap:14px;align-items:center;margin-top:14px}
-  .nodo{width:min(94%,460px);display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:20px;border:3px solid #ffffff22;background:#160c33;color:var(--ink);font-family:'Baloo 2';font-weight:800;font-size:16px;cursor:pointer;text-align:left}
-  .nodo.open{border-color:var(--violet);box-shadow:0 0 18px -6px var(--violet)}
-  .nodo.done{border-color:var(--lime);background:#173a1c}
+
+  /* estudio: ruta, quiz, tablas y robot */
+  .ruta{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .nodo{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink);font-family:var(--f);font-weight:600;font-size:16px;text-align:left;min-height:58px}
+  .nodo.open{border-color:var(--cyan)}
+  .nodo.done{border-color:var(--lime);background:#0E1D14}
   .nodo.lock{opacity:.45;cursor:not-allowed}
-  .nodo-n{font-family:'Bungee';font-size:18px;color:var(--yellow);min-width:28px}
-  .nodo-ic{font-size:30px}
+  .nodo-n{font-family:var(--m);font-size:15px;color:var(--cyan);min-width:24px}
+  .nodo-ic{font-size:26px}
   .nodo-t{flex:1}
-  .opt{padding:14px;border-radius:16px;border:3px solid #ffffff26;background:#0a0420;color:var(--ink);font-family:'Baloo 2';font-weight:800;font-size:18px;cursor:pointer}
-  .opt.ok{border-color:var(--lime);background:#173a1c}
-  .opt.bad{border-color:var(--pink);background:#3b0d2b}
+  .opt{padding:14px;min-height:56px;border-radius:6px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);font-family:var(--f);font-weight:600;font-size:17px}
+  .opt.ok{border-color:var(--lime);background:#0E1D14}
+  .opt.bad{border-color:var(--pink);background:#2A0F20}
   .opt:disabled{cursor:default}
   .tablero{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-width:340px;margin:0 auto}
-  .celda{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:26px;border-radius:12px;background:#ffffff0d;border:2px solid #ffffff1a}
-  .celda.pared{background:#3b0d2b}
-  .celda.meta{background:#173a1c}
+  .celda{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:26px;border-radius:6px;background:#ffffff0a;border:1px solid var(--line)}
+  .celda.pared{background:#2A0F20}
+  .celda.meta{background:#0E1D14}
   .prog{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px;min-height:34px}
-  .prog span{background:var(--violet);color:#fff;font-weight:800;border-radius:10px;padding:4px 10px}
+  .prog span{background:var(--violet);color:#0B0820;font-weight:700;border-radius:6px;padding:4px 10px}
   .flechas{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-  .flecha{font-size:28px;padding:10px;border-radius:14px;border:0;background:var(--cyan);color:#00222a;font-weight:800;cursor:pointer}
-  .hidden{display:none !important}
-  .photo-input{display:none}
+  .flecha{font-size:28px;min-height:52px;border-radius:6px;background:var(--cyan);color:#04141A;font-weight:700}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 </style>
 </head>
 <body>
 <div class="app">
 
-  <header class="brand">
-    <span class="kicker">⚡ MISIÓN DIARIA ⚡</span>
-    <h1>MISIONES</h1>
-    <p>Base de entrenamiento · Frank & Valentina</p>
-  </header>
+  <div class="sys"><span>MISIONES//OS</span><span><i class="live"></i>EN LÍNEA</span></div>
 
-  <!-- PANTALLA: quién juega -->
+  <!-- PANTALLA: quién entra -->
   <section id="v-pick">
-    <div class="pick-title">¿QUIÉN ESTÁ EN SERVICIO?</div>
+    <div class="pick-head">
+      <div class="kick">// IDENTIFICACIÓN</div>
+      <h1>Elige tu<br>piloto</h1>
+      <p>Las misiones de hoy ya están listas. Tú puedes con ellas.</p>
+    </div>
     <div class="pick-grid" id="pick-grid"></div>
+    <div id="install"></div>
   </section>
 
-  <!-- PANTALLA: misiones del niño -->
+  <!-- PANTALLA: misiones del piloto -->
   <section id="v-play" class="hidden">
     <div class="topbar" id="topbar"></div>
+    <div class="carta" id="carta"></div>
 
-    <div class="section-h" style="--c:var(--lime)">🎯 MISIONES DE HOY</div>
+    <div class="section-h" style="--c:var(--lime)">// Misiones de hoy</div>
     <div class="missions" id="missions"></div>
 
     <div id="estudio-entry"></div>
     <div id="gait-entry"></div>
-    <div class="section-h" style="--c:var(--yellow)">🏆 INSIGNIAS</div>
+    <div class="section-h" style="--c:var(--amber)">// Insignias</div>
     <div class="badges" id="badges"></div>
   </section>
 
   <!-- PANTALLA: módulo de marcha (Frank) -->
   <section id="v-gait" class="hidden">
-    <div class="section-h" style="--c:var(--cyan)">🦿 ENTRENAMIENTO DE MARCHA</div>
+    <div class="section-h" style="--c:var(--cyan)">🦿 Entrenamiento de marcha</div>
     <div class="gait-warn">⚠️ Esta es una plantilla. Si sientes dolor, para. Pide que su fisioterapeuta revise y ajuste los ejercicios.</div>
     <div id="gait-body"></div>
     <div id="gait-semana" style="margin-top:14px"></div>
-    <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="gait-back">← VOLVER A MISIONES</button></div>
+    <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="gait-back">← Volver a misiones</button></div>
   </section>
 
   <!-- PANTALLA: ruta de estudio -->
   <section id="v-estudio" class="hidden">
-    <div class="section-h" style="--c:var(--violet)">🎓 RUTA DEL TERCERO</div>
+    <div class="section-h" style="--c:var(--violet)">🎓 Ruta del Tercero</div>
     <div id="est-body"></div>
-    <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="est-back">← VOLVER A MISIONES</button></div>
+    <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="est-back">← Volver a misiones</button></div>
   </section>
 
-  <!-- PANTALLA: panel de padres -->
+  <!-- PANTALLA: centro de mando (Daniel) -->
   <section id="v-panel" class="hidden">
-    <div class="section-h" style="--c:var(--pink)">🛰️ CENTRO DE MANDO</div>
+    <div class="section-h" style="--c:var(--pink)">// Centro de mando</div>
     <div id="panel-gate" class="panel-card" style="max-width:360px;margin:0 auto">
-      <p style="text-align:center;font-weight:800;margin-bottom:12px">Ingresa el PIN de comandante</p>
-      <input id="pin" class="input" type="password" inputmode="numeric" maxlength="6" placeholder="••••" />
+      <p style="text-align:center;font-weight:600;margin-bottom:12px">Ingresa el PIN de comandante</p>
+      <input id="pin" class="input" type="password" inputmode="numeric" maxlength="6" placeholder="••••" aria-label="PIN de comandante" />
       <div style="display:flex;gap:10px;margin-top:12px">
-        <button class="btn" id="pin-go" style="flex:1">ENTRAR</button>
-        <button class="btn ghost" id="pin-back">VOLVER</button>
+        <button class="btn" id="pin-go" style="flex:1">Entrar</button>
+        <button class="btn ghost" id="pin-back">Volver</button>
       </div>
     </div>
     <div id="panel-body" class="hidden"></div>
@@ -238,14 +263,22 @@
   <div class="footer" id="footer"></div>
 </div>
 
+<div id="celebra" class="hidden"></div>
 <input type="file" id="photo" class="photo-input" accept="image/*" capture="environment" />
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* ============ CONFIGURACIÓN ============ */
 const SUPABASE_URL = 'https://wrjftbbliognkgemmzsn.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_B3orSsvBirHhnRFfWsEgxQ_jrk_0blW';   // clave pública (segura en el navegador)
 const PANEL_PIN = '1234';                                                     // ⚠️ cámbialo por tu PIN
+
+// Mensajes de Daniel para cada uno. Cámbialos por lo que quieras decirles: salen en su pantalla cada día.
+const MENSAJES_DANIEL = {
+  Frank: 'Frank: me llena de orgullo verte esforzarte cada día. A tu ritmo, un paso a la vez. Te quiero mucho.',
+  Valentina: 'Valentina: gracias por poner tanto de ti todos los días. Eres muy capaz y estoy muy orgulloso de ti. Te quiero mucho.'
+};
+const MENSAJE_GENERAL = 'Cada misión que haces suma, y yo lo veo. Gracias por tu esfuerzo. Te quiero mucho.';
 /* ======================================= */
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -254,13 +287,28 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&
 const hoy = () => new Date().toLocaleDateString('en-CA');              // YYYY-MM-DD local (Bogotá)
 const LEVEL_XP = 100;
 
-const state = { ninos: [], misiones: [], nino: null, completados: [], busy: false, pendingMision: null };
+const ANIMO = [
+  'Lo estás haciendo increíble.',
+  'Cada misión suma, y se nota.',
+  'Gracias por tu esfuerzo de hoy.',
+  'Un paso más y sigues volando.',
+  'Qué orgullo verte avanzar.'
+];
+const animo = () => ANIMO[Math.floor(Math.random() * ANIMO.length)];
+
+const CHECK = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06210A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const CHEV = (c) => `<svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>`;
+
+const state = { ninos: [], misiones: [], nino: null, completados: [], resumen: new Map(), busy: false, pendingMision: null };
 
 function toast(msg, err=false){
   const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err?' err':'');
-  clearTimeout(toast._t); toast._t = setTimeout(()=> t.className='toast', 2600);
+  clearTimeout(toast._t); toast._t = setTimeout(()=> t.className='toast', 3200);
 }
 function show(id){ ['v-pick','v-play','v-panel','v-gait','v-estudio'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id)); window.scrollTo({top:0,behavior:'smooth'}); }
+function vibrar(p){ try{ if (navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 
 /* ============ DATOS ============ */
 async function loadBase(){
@@ -271,27 +319,41 @@ async function loadBase(){
   if (n.error || m.error) throw (n.error || m.error);
   state.ninos = n.data; state.misiones = m.data;
 }
-async function loadCompletados(ninoId){
-  const desde = new Date(); desde.setDate(desde.getDate() - 60);
-  const { data, error } = await sb.from('completados').select('*')
-    .eq('nino_id', ninoId).gte('fecha', desde.toLocaleDateString('en-CA'));
-  if (error) throw error;
-  state.completados = data;
+// Trae TODO el historial (de a 1000) para que el nivel y el XP nunca bajen con el tiempo.
+async function fetchCompletados(ninoId){
+  const out = [], paso = 1000;
+  for (let desde = 0; ; desde += paso){
+    let q = sb.from('completados').select('id,nino_id,mision_id,fecha,foto_url')
+      .order('created_at', { ascending: true }).range(desde, desde + paso - 1);
+    if (ninoId) q = q.eq('nino_id', ninoId);
+    const { data, error } = await q;
+    if (error) throw error;
+    out.push(...data);
+    if (data.length < paso) break;
+  }
+  return out;
+}
+async function loadCompletados(ninoId){ state.completados = await fetchCompletados(ninoId); }
+async function loadResumen(){
+  const rows = await fetchCompletados(null);
+  state.resumen = new Map(state.ninos.map(n => {
+    const mine = rows.filter(r => r.nino_id === n.id);
+    return [n.id, { xp: calcXp(mine), racha: calcRacha(mine), hoy: mine.filter(r => r.fecha === hoy()).length }];
+  }));
 }
 
 /* ============ CÁLCULOS ============ */
-function xpTotal(){
-  return state.completados.reduce((acc, c) => {
-    const m = state.misiones.find(x => x.id === c.mision_id); return acc + (m?.xp || 0);
-  }, 0);
+function calcXp(rows){
+  return rows.reduce((acc, c) => acc + (state.misiones.find(x => x.id === c.mision_id)?.xp || 0), 0);
 }
-function rachaDias(){
-  const dias = new Set(state.completados.map(c => c.fecha));
+function calcRacha(rows){
+  const dias = new Set(rows.map(c => c.fecha));
   let d = new Date(); let n = 0;
   if (!dias.has(hoy())) d.setDate(d.getDate()-1);           // si hoy aún no hace nada, la racha sigue de ayer
   while (dias.has(d.toLocaleDateString('en-CA'))) { n++; d.setDate(d.getDate()-1); }
   return n;
 }
+const xpTotal = () => calcXp(state.completados);
 const INSIGNIAS = [
   { id:'primera', icon:'🥇', nombre:'Primera Misión', cond: s => s.total >= 1 },
   { id:'racha3',  icon:'🔥', nombre:'Racha x3', cond: s => s.racha >= 3 },
@@ -301,22 +363,40 @@ const INSIGNIAS = [
   { id:'loza',    icon:'🍽️', nombre:'Rey de la Loza', cond: s => s.porMision.get('Misión Loza') >= 5 },
   { id:'tablas',  icon:'🧠', nombre:'Genio de Tablas', cond: s => s.porMision.get('Laboratorio de Tablas') >= 5 },
 ];
+function saludo(){ const h = new Date().getHours(); return h < 12 ? 'BUENOS DÍAS' : h < 19 ? 'BUENAS TARDES' : 'BUENAS NOCHES'; }
 
 /* ============ PANTALLA: SELECCIÓN ============ */
 function renderPick(){
-  $('#pick-grid').innerHTML = state.ninos.map(n => `
-    <div class="hero" style="--c:${esc(n.color)}" data-id="${n.id}">
-      <span class="tag">JUGADOR</span>
-      <div class="av">${esc(n.avatar)}</div>
-      <div class="nm">${esc(n.nombre.toUpperCase())}</div>
-      <div class="sub">Toca para entrar a tu base</div>
-    </div>`).join('');
+  const C = 213.6;
+  $('#pick-grid').innerHTML = state.ninos.map(n => {
+    const r = state.resumen.get(n.id) || { xp: 0, racha: 0, hoy: 0 };
+    const nivel = Math.floor(r.xp / LEVEL_XP) + 1;
+    const dash = (C * (1 - (r.xp % LEVEL_XP) / LEVEL_XP)).toFixed(1);
+    return `
+    <button class="hero" style="--c:${esc(n.color)}" data-id="${esc(n.id)}" aria-label="Entrar como ${esc(n.nombre)}">
+      <span class="ring">
+        <svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true">
+          <circle cx="42" cy="42" r="34" fill="none" stroke="#1C2A44" stroke-width="5"/>
+          <circle cx="42" cy="42" r="34" fill="none" stroke="${esc(n.color)}" stroke-width="5" stroke-linecap="round"
+            stroke-dasharray="${C}" stroke-dashoffset="${dash}" transform="rotate(-90 42 42)"/>
+        </svg>
+        <span class="av">${esc(n.avatar)}</span>
+      </span>
+      <span class="hinfo">
+        <span class="nm">${esc(n.nombre)}</span>
+        <span class="sub">NIVEL ${nivel} · ${r.xp} XP</span>
+        <span class="st">RACHA ${r.racha} ${r.racha === 1 ? 'DÍA' : 'DÍAS'} · HOY ${r.hoy}/${state.misiones.length}</span>
+      </span>
+      ${CHEV(n.color)}
+    </button>`;
+  }).join('');
   document.querySelectorAll('.hero').forEach(el => el.onclick = () => entrar(el.dataset.id));
 }
 
 async function entrar(id){
   state.nino = state.ninos.find(n => n.id === id);
-  await loadCompletados(id);
+  try { await loadCompletados(id); }
+  catch(e){ console.error(e); toast('No pude cargar tus misiones. Revisa tu internet.', true); return; }
   show('v-play'); renderPlay();
 }
 
@@ -326,38 +406,56 @@ function renderPlay(){
   const xp = xpTotal();
   const nivel = Math.floor(xp / LEVEL_XP) + 1;
   const enNivel = xp % LEVEL_XP;
-  const racha = rachaDias();
+  const racha = calcRacha(state.completados);
   state.nivel = nivel; state.racha = racha;
+  const hoyDone = new Map(state.completados.filter(c=>c.fecha===hoy()).map(c=>[c.mision_id,c]));
 
   $('#topbar').style.setProperty('--c', n.color);
   $('#topbar').innerHTML = `
-    <div class="av">${esc(n.avatar)}</div>
-    <div class="info">
-      <div class="hi">¡Hola, ${esc(n.nombre)}!</div>
-      <div class="lvl">NIVEL ${nivel} · ${xp} XP</div>
-      <div class="xpbar"><div class="xpfill" style="width:${enNivel}%"></div></div>
+    <div class="tb-row">
+      <div class="av">${esc(n.avatar)}</div>
+      <div class="info">
+        <div class="kk">${saludo()}</div>
+        <div class="hi">${esc(n.nombre)}</div>
+      </div>
+      <div class="lv"><small>NIVEL</small><b>${nivel}</b></div>
     </div>
-    <div class="streak"><b>${racha}</b><span>🔥 racha</span></div>
-    <button class="switch" id="switch">Cambiar</button>`;
-  $('#switch').onclick = () => { state.nino=null; show('v-pick'); renderPick(); };
-  setTimeout(()=>{ const f=document.querySelector('.xpfill'); if(f) f.style.width = enNivel+'%'; }, 50);
+    <div>
+      <div class="xprow"><span>${xp} XP</span><span>${LEVEL_XP - enNivel} XP para el nivel ${nivel + 1}</span></div>
+      <div class="xpbar"><div class="xpfill" style="width:0"></div></div>
+    </div>
+    <div class="stats">
+      <div class="stat s1">RACHA<b>${racha} ${racha === 1 ? 'día' : 'días'}</b></div>
+      <div class="stat s2">HOY<b>${hoyDone.size}/${state.misiones.length}</b></div>
+    </div>
+    <button class="switch" id="switch" style="align-self:flex-start">← CAMBIAR PILOTO</button>`;
+  $('#switch').onclick = async () => {
+    state.nino = null; show('v-pick');
+    try { await loadResumen(); } catch(e){ console.error(e); }
+    renderPick();
+  };
+  setTimeout(()=>{ const f=document.querySelector('.xpfill'); if(f) f.style.width = enNivel+'%'; }, 60);
 
-  const hoyDone = new Map(state.completados.filter(c=>c.fecha===hoy()).map(c=>[c.mision_id,c]));
+  $('#carta').innerHTML = `
+    <div class="l">// MENSAJE DE DANIEL</div>
+    <p>${esc(MENSAJES_DANIEL[n.nombre] || MENSAJE_GENERAL)}</p>`;
+
   $('#missions').innerHTML = state.misiones.map(m => {
     const done = hoyDone.has(m.id);
     return `
-    <div class="mission ${done?'done':''}" style="--c:${esc(n.color)}" data-m="${m.id}">
-      ${done ? '<div class="stamp">¡LISTO!</div>' : ''}
-      <div class="em">${esc(m.emoji)}</div>
-      <h3>${esc(m.nombre)}</h3>
-      <p>${esc(m.descripcion)}</p>
-      <div class="chips">
+    <button class="mission ${done?'done':''}" style="--c:${esc(n.color)}" data-m="${m.id}" aria-pressed="${done}"
+      aria-label="${esc(m.nombre)}${done ? ', lista. Toca para desmarcar' : ''}">
+      <span class="em">${esc(m.emoji)}</span>
+      <span class="t">${esc(m.nombre)}</span>
+      <span class="d">${esc(m.descripcion)}</span>
+      <span class="chips">
         <span class="chip xp">+${m.xp} XP</span>
         ${m.requiere_foto ? '<span class="chip cam">📸 pide foto</span>' : ''}
-      </div>
-    </div>`;
+      </span>
+      <span class="tick">${CHECK}</span>
+    </button>`;
   }).join('');
-  document.querySelectorAll('.mission').forEach(el => el.onclick = () => tocarMision(Number(el.dataset.m)));
+  document.querySelectorAll('.mission[data-m]').forEach(el => el.onclick = () => tocarMision(Number(el.dataset.m)));
 
   // Insignias
   const porMision = new Map();
@@ -377,7 +475,6 @@ function renderPlay(){
 async function tocarMision(misionId){
   if (state.busy) return;
   const m = state.misiones.find(x=>x.id===misionId);
-  const n = state.nino;
   const reg = state.completados.find(c => c.mision_id===misionId && c.fecha===hoy());
   state.busy = true;
 
@@ -387,7 +484,7 @@ async function tocarMision(misionId){
       const { error } = await sb.from('completados').delete().eq('id', reg.id);
       if (error) throw error;
       state.completados = state.completados.filter(c => c.id !== reg.id);
-      toast(`Misión "${m.nombre}" desmarcada`);
+      toast(`"${m.nombre}" desmarcada. Cuando la termines, la marcas de nuevo.`);
       return renderPlay();
     }
 
@@ -413,7 +510,35 @@ async function registrar(m, fotoUrl){
   state.completados.push(data);
   renderPlay();
   lanzarConfetti(n.color);
-  toast(`+${m.xp} XP · ¡${m.nombre} completada! 🎉`);
+  vibrar(40);
+  toast(`+${m.xp} XP · ${m.nombre} lista. ${animo()}`);
+  checkDiaCompleto();
+}
+
+/* Cuando termina todas las misiones del día: una sola celebración por día */
+function checkDiaCompleto(){
+  const n = state.nino;
+  const hechas = new Set(state.completados.filter(c => c.fecha === hoy()).map(c => c.mision_id));
+  if (!state.misiones.length || !state.misiones.every(m => hechas.has(m.id))) return;
+  const key = `dia_${n.id}_${hoy()}`;
+  if (lsGet(key)) return;
+  lsSet(key, '1');
+  setTimeout(() => {
+    $('#celebra').className = 'celebra';
+    $('#celebra').style.setProperty('--c', n.color);
+    $('#celebra').innerHTML = `
+      <div class="card" role="dialog" aria-label="Día completo">
+        <div class="big">🏆</div>
+        <h2>¡Día completo, ${esc(n.nombre)}!</h2>
+        <p>Hiciste todas tus misiones de hoy. Descansa tranquilo: te lo ganaste.</p>
+        <p class="firma">${esc(MENSAJES_DANIEL[n.nombre] || MENSAJE_GENERAL)}</p>
+        <button class="btn" id="celebra-ok" style="width:100%;margin-top:18px">Gracias</button>
+      </div>`;
+    $('#celebra-ok').onclick = () => { $('#celebra').className = 'hidden'; $('#celebra').innerHTML = ''; };
+    $('#celebra-ok').focus();
+    lanzarConfetti(n.color); setTimeout(() => lanzarConfetti('#FFB020'), 500);
+    vibrar([60, 40, 60]);
+  }, 900);
 }
 
 $('#photo').addEventListener('change', async (ev) => {
@@ -430,16 +555,46 @@ $('#photo').addEventListener('change', async (ev) => {
     const { data: pub } = sb.storage.from('pruebas').getPublicUrl(path);
     await registrar(m, pub.publicUrl);
   } catch(e){
-    console.error(e); toast('No se pudo subir la foto', true);
+    console.error(e); toast('No se pudo subir la foto. Intenta otra vez.', true);
   } finally { state.busy = false; }
 });
 
 function lanzarConfetti(color){
   if (typeof confetti !== 'function') return;
-  const colors = [color, '#ffd60a', '#b6ff3b', '#ff3d7f', '#00e5ff'];
+  const colors = [color, '#FFB020', '#B8FF3D', '#FF3D8B', '#22E4FF'];
   confetti({ particleCount: 140, spread: 80, origin: { y: .45 }, colors });
   setTimeout(()=> confetti({ particleCount: 60, angle: 60, spread: 55, origin: { x: 0 }, colors }), 220);
   setTimeout(()=> confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1 }, colors }), 220);
+}
+
+/* ============ INSTALAR COMO APP ============ */
+let promptInstalar = null;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); promptInstalar = e; renderInstall(); });
+window.addEventListener('appinstalled', () => { promptInstalar = null; lsSet('instalar_oculto', '1'); renderInstall(); toast('¡Listo! Ya tienes la app en tu pantalla de inicio 🎉'); });
+
+function esApp(){ return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+function renderInstall(){
+  const box = $('#install'); if (!box) return;
+  if (esApp() || lsGet('instalar_oculto')){ box.innerHTML = ''; return; }
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  let cuerpo, accion = '';
+  if (promptInstalar){
+    cuerpo = 'Instálala y abre tus misiones con un toque, como cualquier otra app. Funciona sin barra del navegador.';
+    accion = '<button class="btn" id="inst-go">Instalar app</button>';
+  } else if (ios){
+    cuerpo = 'En el iPhone: abre esta página en <b>Safari</b>, toca <b>Compartir</b> (el cuadro con la flecha) y luego <b>Agregar a pantalla de inicio</b>.';
+  } else {
+    cuerpo = 'Para instalarla: abre el menú del navegador (los tres puntos) y elige <b>Instalar aplicación</b> o <b>Agregar a pantalla principal</b>.';
+  }
+  box.innerHTML = `
+    <div class="install">
+      <div class="t">// LLÉVALA EN TU CELULAR</div>
+      <p>${cuerpo}</p>
+      <div class="row">${accion}<button class="btn ghost" id="inst-no">Ahora no</button></div>
+    </div>`;
+  const go = $('#inst-go');
+  if (go) go.onclick = async () => { promptInstalar.prompt(); try{ await promptInstalar.userChoice; }catch(e){} promptInstalar = null; renderInstall(); };
+  $('#inst-no').onclick = () => { lsSet('instalar_oculto', '1'); renderInstall(); };
 }
 
 /* ============ MÓDULO ESPECIAL: MARCHA (Frank) ============ */
@@ -465,7 +620,7 @@ function renderGaitEntry(){
   if (!box) return;
   if (!state.nino || state.nino.nombre !== 'Frank'){ box.innerHTML=''; return; }
   box.innerHTML = `
-    <div class="section-h" style="--c:var(--cyan)">🦿 MÓDULO ESPECIAL</div>
+    <div class="section-h" style="--c:var(--cyan)">// Módulo especial</div>
     <div class="missions">
       <div class="mission" id="gait-open" style="--c:var(--cyan)">
         <div class="em">🦿</div>
@@ -489,9 +644,9 @@ function renderGaitStep(){
     body.innerHTML = `
       <div class="panel-card" style="text-align:center">
         <div style="font-size:70px">🏅</div>
-        <div class="bungee" style="font-size:22px;color:var(--lime);margin:8px 0">¡ENTRENAMIENTO COMPLETO!</div>
-        <p style="color:var(--muted);font-weight:700;margin-bottom:14px">Hiciste ${minutosGait()} min de movimiento hoy.</p>
-        <button class="btn" id="gait-save" style="width:100%">GUARDAR SESIÓN</button>
+        <div class="bungee" style="font-size:24px;color:var(--lime);margin:8px 0">¡Entrenamiento completo!</div>
+        <p style="color:var(--muted);font-weight:500;margin-bottom:14px">Hiciste ${minutosGait()} min de movimiento hoy. Qué orgullo.</p>
+        <button class="btn" id="gait-save" style="width:100%">Guardar sesión</button>
       </div>`;
     $('#gait-save').onclick = guardarSesionGait;
     return;
@@ -504,12 +659,12 @@ function renderGaitStep(){
   body.innerHTML = `
     <div class="panel-card">
       <div class="gait-steps">${dots}</div>
-      <div class="bungee" style="font-size:24px;color:var(--cyan);text-align:center">${esc(s.t)}</div>
-      <p style="font-weight:700;margin:8px 0 14px;font-size:17px;text-align:center">${esc(s.d)}</p>
-      <div id="gait-clock" class="bungee" style="font-size:64px;text-align:center;color:var(--yellow);margin:10px 0">${fmtTiempo(gait.left ?? s.s)}</div>
+      <div class="bungee" style="font-size:26px;color:var(--cyan);text-align:center">${esc(s.t)}</div>
+      <p style="font-weight:500;margin:8px 0 14px;font-size:17px;text-align:center;line-height:1.4">${esc(s.d)}</p>
+      <div id="gait-clock" style="font-family:var(--m);font-weight:700;font-size:64px;text-align:center;color:var(--amber);margin:10px 0">${fmtTiempo(gait.left ?? s.s)}</div>
       <div style="display:flex;gap:10px">
-        <button class="btn" id="gait-go" style="flex:1">${gait.running ? 'PAUSAR' : 'EMPEZAR'}</button>
-        <button class="btn ghost" id="gait-skip">SALTAR</button>
+        <button class="btn" id="gait-go" style="flex:1">${gait.running ? 'Pausar' : 'Empezar'}</button>
+        <button class="btn ghost" id="gait-skip">Saltar</button>
       </div>
     </div>`;
   $('#gait-go').onclick = toggleGait;
@@ -529,7 +684,8 @@ function toggleGait(){
     if (gait.left <= 0){
       stopGait();
       gait.hechos.push(gait.idx);
-      lanzarConfetti('#b6ff3b');
+      lanzarConfetti('#B8FF3D');
+      vibrar(80);
       gait.idx++; gait.left = null;
       toast('¡Bien hecho! Siguiente paso 💪');
       renderGaitStep();
@@ -545,7 +701,7 @@ async function guardarSesionGait(){
       nino_id: state.nino.id, fecha: hoy(), minutos, pasos: gait.hechos.length
     });
     if (error) throw error;
-    lanzarConfetti('#00e5ff');
+    lanzarConfetti('#22E4FF');
     toast(`Sesión guardada: ${minutos} min 🦿`);
     gait.idx=0; gait.left=null; gait.hechos=[];
     renderGaitStep(); loadGaitSemana();
@@ -570,18 +726,18 @@ async function loadGaitSemana(){
   const max = Math.max(10, ...dias.map(d=>d.m));
   box.innerHTML = `
     <div class="panel-card">
-      <div class="bungee" style="font-size:15px;margin-bottom:10px">📈 ESTA SEMANA</div>
+      <div class="section-h" style="--c:var(--cyan);margin-top:0">// Esta semana</div>
       <div style="display:flex;align-items:flex-end;gap:8px;height:130px">
         ${dias.map(d=>`<div style="flex:1;text-align:center">
-          <div style="height:${Math.round(d.m/max*100)}px;min-height:6px;border-radius:10px 10px 4px 4px;background:linear-gradient(180deg,var(--cyan),var(--violet))"></div>
-          <div style="font-size:11px;font-weight:800;color:var(--muted);margin-top:4px">${esc(d.letra)}</div>
-          <div style="font-size:11px;font-weight:800">${d.m}m</div>
+          <div style="height:${Math.round(d.m/max*100)}px;min-height:6px;border-radius:4px 4px 2px 2px;background:var(--cyan)"></div>
+          <div style="font-family:var(--m);font-size:11px;color:var(--muted);margin-top:4px">${esc(d.letra)}</div>
+          <div style="font-family:var(--m);font-size:11px">${d.m}m</div>
         </div>`).join('')}
       </div>
     </div>`;
 }
 
-/* ============ PANEL DE PAPÁ ============ */
+/* ============ CENTRO DE MANDO (Daniel) ============ */
 $('#pin-go').onclick = async () => {
   if ($('#pin').value !== PANEL_PIN){ toast('PIN incorrecto', true); $('#pin').value=''; return; }
   $('#panel-gate').classList.add('hidden');
@@ -609,7 +765,7 @@ async function renderPanel(){
   });
 
   const total = state.misiones.length;
-  const cards = resumen.map(({n, xp, semana, dias, hoy:h, mine}) => {
+  const cards = resumen.map(({n, xp, dias, hoy:h, mine}) => {
     const pct = Math.round((h / total) * 100);
     const heat = [...Array(7)].map((_,i) => {
       const d = new Date(); d.setDate(d.getDate() - (6-i));
@@ -623,12 +779,12 @@ async function renderPanel(){
       <div style="display:flex;align-items:center;gap:12px">
         <div style="font-size:44px">${esc(n.avatar)}</div>
         <div style="flex:1">
-          <div class="bungee" style="color:${esc(n.color)};font-size:20px">${esc(n.nombre)}</div>
-          <div style="color:var(--muted);font-weight:700;font-size:14px">${xp} XP esta semana · ${dias}/7 días activos</div>
+          <div class="bungee" style="color:${esc(n.color)};font-size:22px">${esc(n.nombre)}</div>
+          <div style="color:var(--muted);font-family:var(--m);font-size:12px">${xp} XP esta semana · ${dias}/7 días activos</div>
         </div>
         <div style="text-align:right">
-          <div class="bungee" style="font-size:28px;color:var(--lime)">${h}/${total}</div>
-          <div style="color:var(--muted);font-size:12px;font-weight:700">HOY · ${pct}%</div>
+          <div class="bungee" style="font-size:30px;color:var(--lime)">${h}/${total}</div>
+          <div style="color:var(--dim);font-family:var(--m);font-size:11px">HOY · ${pct}%</div>
         </div>
       </div>
       <div class="heat">${heat}</div>
@@ -638,11 +794,11 @@ async function renderPanel(){
   const fotos = rows.filter(r => r.foto_url).slice(0, 12);
   const galeria = fotos.length ? `
     <div class="panel-card">
-      <div class="bungee" style="font-size:16px;margin-bottom:10px">📸 ÚLTIMAS PRUEBAS</div>
+      <div class="section-h" style="--c:var(--cyan);margin-top:0">// Últimas pruebas</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px">
         ${fotos.map(f => `<a href="${esc(f.foto_url)}" target="_blank" rel="noopener">
-          <img src="${esc(f.foto_url)}" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;border:2px solid #ffffff22" />
-          <div style="font-size:11px;color:var(--muted);font-weight:700;margin-top:4px">${esc(state.ninos.find(n=>n.id===f.nino_id)?.nombre)} · ${esc(misionMap.get(f.mision_id)?.nombre)}</div>
+          <img src="${esc(f.foto_url)}" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;border:1px solid var(--line2)" />
+          <div style="font-size:12px;color:var(--muted);font-weight:500;margin-top:4px">${esc(state.ninos.find(n=>n.id===f.nino_id)?.nombre)} · ${esc(misionMap.get(f.mision_id)?.nombre)}</div>
         </a>`).join('')}
       </div>
     </div>` : '';
@@ -653,20 +809,20 @@ async function renderPanel(){
       <td>${esc(r.fecha)}</td>
       <td><span class="dot" style="background:${esc(n?.color)}"></span>${esc(n?.nombre)}</td>
       <td>${esc(m?.emoji)} ${esc(m?.nombre)}</td>
-      <td style="color:var(--yellow)">+${m?.xp||0}</td>
+      <td style="color:var(--amber)">+${m?.xp||0}</td>
       <td>${r.foto_url ? '📸' : '—'}</td></tr>`;
   }).join('');
 
   $('#panel-body').innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0 6px">
-      <div style="color:var(--muted);font-weight:800">Semana del ${esc(desde.toLocaleDateString('es-CO',{day:'numeric',month:'short'}))} a hoy</div>
+      <div style="color:var(--muted);font-family:var(--m);font-size:12px">Semana del ${esc(desde.toLocaleDateString('es-CO',{day:'numeric',month:'short'}))} a hoy</div>
       <button class="btn ghost" id="panel-exit">Salir</button>
     </div>
     ${cards}
     ${galeria}
     <div class="panel-card">
-      <div class="bungee" style="font-size:16px;margin-bottom:6px">📜 BITÁCORA</div>
-      <div style="overflow-x:auto"><table>
+      <div class="section-h" style="--c:var(--amber);margin-top:0">// Bitácora</div>
+      <div style="overflow-x:auto"><table style="min-width:420px">
         <thead><tr><th>Fecha</th><th>Quién</th><th>Misión</th><th>XP</th><th>Foto</th></tr></thead>
         <tbody>${bitacora || '<tr><td colspan="5" style="color:var(--muted)">Todavía no hay misiones esta semana</td></tr>'}</tbody>
       </table></div>
@@ -676,16 +832,18 @@ async function renderPanel(){
 
 /* ============ ARRANQUE ============ */
 (async function init(){
-  $('#footer').textContent = 'Hecho con 💜 para Frank y Valentina · versión 4 (con Ruta del Tercero)';
+  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 5 · Misiones OS';
   if (location.hash === '#panel'){ show('v-panel'); }
   else show('v-pick');
   try{
     await loadBase();
+    try { await loadResumen(); } catch(e){ console.error(e); }   // si falla, igual se puede jugar
     renderPick();
   } catch(e){
     console.error(e);
-    $('#pick-grid').innerHTML = '<p style="text-align:center;color:var(--pink);font-weight:800">No pude conectar con la base. Revisa la configuración.</p>';
+    $('#pick-grid').innerHTML = '<p style="color:var(--pink);font-weight:600">No pude conectar con la base. Revisa tu internet e intenta de nuevo.</p>';
   }
+  renderInstall();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   $('#pin').addEventListener('keydown', e => { if (e.key==='Enter') $('#pin-go').click(); });
 })();

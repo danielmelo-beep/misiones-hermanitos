@@ -1,32 +1,35 @@
 # Misiones · Frank & Valentina
 
-Checklist gamificado para que Frank y Valentina marquen sus tareas del día (ducha, uniforme, zapatos, tablas, loza, cama) y tú veas el reporte desde el **Centro de Mando**.
+La app de tareas, estudio y entrenamiento de Frank y Valentina, hecha con cariño. Es una **PWA**: se abre desde el navegador y se instala como un acceso directo en el celular, con su propio ícono y sin barra del navegador.
 
-## Cómo funciona
+## Qué tiene
 
-- **Pantalla de inicio:** cada hermano elige su personaje.
-- **Misiones del día:** tocar una misión la marca como completada y suma XP. Si pide foto, abre la cámara.
-- **Niveles, rachas e insignias** para motivar.
-- **Centro de Mando (solo para ti):** entra a `index.html#panel`, ingresa el PIN y verás:
-  - Progreso de hoy de cada uno.
-  - XP y días activos de la semana.
-  - Calendario de la semana por niño.
-  - Galería de fotos de prueba.
-  - Bitácora con las últimas 30 misiones.
+- **Misiones del día** con XP, niveles, rachas e insignias. Algunas piden foto como prueba.
+- **Mensaje de Daniel** en la pantalla de cada uno y una celebración cuando completan todas las misiones del día.
+- **Ruta del Tercero**: lecciones, retos, tablas con repetición espaciada y el robot de programación (`estudio.js`).
+- **Entrenamiento de Marcha** (solo para Frank). Es una plantilla: el fisioterapeuta debe revisarla y ajustarla.
+- **Centro de Mando** para Daniel: `index.html#panel` + PIN. Ve el progreso de hoy, la semana, las fotos y la bitácora.
 
-## Configuración
+## Cómo instalarla en el celular
 
-1. Ejecuta `schema.sql` en el SQL Editor de Supabase (ya está aplicado en el proyecto `misiones-hermanitos`).
-2. En `index.html`, cambia `PANEL_PIN` por tu PIN.
-3. Sube la carpeta a cualquier hosting estático (GitHub Pages, Netlify, Vercel). Un solo archivo HTML.
+1. Abre el enlace de la app (GitHub Pages) en el navegador del celular.
+2. **Android (Chrome):** toca *Instalar app* en la tarjeta de la pantalla de inicio, o menú ⋮ → *Instalar aplicación*.
+3. **iPhone (Safari):** botón *Compartir* → *Agregar a pantalla de inicio*.
 
 ## Personalizar
 
-- **Misiones:** agrega, edita o desactiva filas en la tabla `misiones` (`activa = false` las oculta).
-- **Foto de prueba:** cambia `requiere_foto` a `true` en cualquier misión.
-- **Colores y avatares:** tabla `ninos`.
+- **Mensajes de Daniel:** constante `MENSAJES_DANIEL` en `index.html`.
+- **PIN del panel:** constante `PANEL_PIN` en `index.html` (cámbialo; está en el código del navegador, así que solo evita entradas por accidente).
+- **Misiones, avatares y colores:** tablas `misiones` y `ninos` en Supabase.
+- **Íconos:** `python3 hacer-iconos.py` vuelve a generar los PNG a partir del mismo diseño que `icon.svg`.
 
-## Seguridad (importante)
+## Archivos
 
-- Los niños entran sin contraseña. Por eso la base solo permite leer datos, registrar misiones y borrar las del último par de días. No pueden cambiar misiones ni ver datos de otros proyectos.
-- El PIN del panel está en el código del navegador, así que **no es una protección fuerte**. Sirve para que los niños no entren por accidente. Si quieres algo más robusto, puedo migrar el panel a Supabase Auth con tu correo.
+- `index.html`: la app (diseño Misiones OS).
+- `estudio.js`: Ruta del Tercero.
+- `sw.js` y `manifest.webmanifest`: instalación y uso sin conexión.
+- `schema.sql`: tablas base de Supabase.
+
+## Seguridad
+
+Los niños entran sin contraseña, por eso la base solo les permite leer datos, registrar misiones y deshacer las de los últimos días. El PIN del panel no es una protección fuerte. Si quieres algo más robusto, el panel puede pasar a Supabase Auth con tu correo.
