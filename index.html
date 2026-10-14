@@ -167,6 +167,18 @@
   .btn:disabled{opacity:.5;cursor:default}
   .btn.ghost{background:none;color:var(--muted);border:1px solid var(--line2);font-weight:600}
 
+  /* tema de Valentina: princesas, colores suaves */
+  body.tema-valentina{
+    --bg:#1A0B26; --panel:#2A1238; --panel2:#220E30; --line:#4A2A63; --line2:#6A3C8A;
+    --ink:#FFF3FB; --muted:#E8C7F2; --dim:#C79BDB; --cyan:#FF8FC7; --lime:#FFE27A; --amber:#FFC857; --violet:#D2A8FF;
+    background-image:radial-gradient(circle at 12% 18%,#ff8fc733 0 2px,transparent 3px),radial-gradient(circle at 78% 32%,#ffe27a33 0 2px,transparent 3px),radial-gradient(circle at 40% 70%,#d2a8ff33 0 2px,transparent 3px),radial-gradient(circle at 88% 85%,#ff8fc733 0 2px,transparent 3px);
+    background-size:140px 140px;
+  }
+  body.tema-valentina .topbar,body.tema-valentina .mission,body.tema-valentina .panel-card,body.tema-valentina .carta{border-radius:18px}
+  body.tema-valentina .btn{border-radius:99px;color:#2A1238}
+  body.tema-valentina .btn.ghost{color:var(--muted);background:none}
+  body.tema-valentina .topbar .kk::after{content:" 👑";}
+  body.tema-valentina .mission.done{background:#3A1A4A}
   /* horarios y recordatorios */
   .chip.hora{color:var(--lime);border-color:#B8FF3D55}
   .chip.tarde{color:var(--pink);border-color:#FF3D8B77}
@@ -264,7 +276,9 @@
     <div class="section-h" style="--c:var(--lime)">// Misiones de hoy</div>
     <div class="missions" id="missions"></div>
 
+    <div id="arte-entry"></div>
     <div id="lab-entry"></div>
+    <div id="ingles-entry"></div>
     <div id="estudio-entry"></div>
     <div id="gait-entry"></div>
     <div class="section-h" style="--c:var(--amber)">// Insignias</div>
@@ -285,6 +299,20 @@
     <div class="section-h" style="--c:var(--cyan)">🧪 Laboratorio de sistemas</div>
     <div id="lab-body"></div>
     <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="lab-back">← Volver a misiones</button></div>
+  </section>
+
+  <!-- PANTALLA: English Club -->
+  <section id="v-ingles" class="hidden">
+    <div class="section-h" style="--c:var(--pink)">🇬🇧 English Club</div>
+    <div id="ing-body"></div>
+    <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="ing-back">← Volver a misiones</button></div>
+  </section>
+
+  <!-- PANTALLA: taller de arte (Valentina) -->
+  <section id="v-arte" class="hidden">
+    <div class="section-h" style="--c:var(--pink)">🎨 Taller de arte</div>
+    <div id="arte-body"></div>
+    <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="arte-back">← Volver a misiones</button></div>
   </section>
 
   <!-- PANTALLA: ruta de estudio -->
@@ -353,7 +381,8 @@ function toast(msg, err=false){
   const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err?' err':'');
   clearTimeout(toast._t); toast._t = setTimeout(()=> t.className='toast', 3200);
 }
-function show(id){ ['v-pick','v-play','v-panel','v-gait','v-estudio','v-lab'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id)); window.scrollTo({top:0,behavior:'smooth'}); }
+function show(id){ ['v-pick','v-play','v-panel','v-gait','v-estudio','v-lab','v-ingles','v-arte'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id));
+  if (id === 'v-pick' || id === 'v-panel') document.body.classList.remove('tema-valentina'); window.scrollTo({top:0,behavior:'smooth'}); }
 function vibrar(p){ try{ if (navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -552,6 +581,9 @@ function renderPlay(){
   renderGaitEntry();
   renderEstudioEntry();
   if (typeof renderLabEntry === 'function') renderLabEntry();
+  if (typeof renderEnglishEntry === 'function') renderEnglishEntry();
+  if (typeof renderArteEntry === 'function') renderArteEntry();
+  document.body.classList.toggle('tema-valentina', n.nombre === 'Valentina');
   renderHorario();
   renderNotifEntry();
   $('#badges').innerHTML = INSIGNIAS.map(b => {
@@ -1020,6 +1052,14 @@ async function renderPanel(){
   }).join('');
 
   const labHtml = (typeof renderPanelLab === 'function') ? await renderPanelLab() : '';
+  const enHtml = (typeof renderPanelEnglish === 'function') ? await renderPanelEnglish() : '';
+  const arteHtml = (typeof renderPanelArte === 'function') ? await renderPanelArte() : '';
+  let ayudaHtml = '';
+  try {
+    const { data: ay, error: eAy } = await sb.rpc('ver_ayudas', { p_pin: state.pin });
+    if (!eAy && ay && ay.length) ayudaHtml = `<div class="panel-card" style="border-color:#FF3D8B88"><div class="section-h" style="--c:var(--pink);margin-top:0">// Pedidos de ayuda</div>
+      ${ay.slice(0, 8).map(a => `<div style="padding:6px 0;border-top:1px solid var(--line);font-size:14px;font-weight:500"><b>${esc(state.ninos.find(n => n.id === a.nino_id)?.nombre || '')}</b> · ${esc(a.contexto || '')} · ${esc(a.texto || '')}<div style="color:var(--dim);font-family:var(--m);font-size:11px">${esc(new Date(a.created_at).toLocaleString('es-CO'))}</div></div>`).join('')}</div>`;
+  } catch(e){ console.error(e); }
   $('#panel-body').innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0 6px">
       <div style="color:var(--muted);font-family:var(--m);font-size:12px">Semana del ${esc(desde.toLocaleDateString('es-CO',{day:'numeric',month:'short'}))} a hoy</div>
@@ -1027,8 +1067,11 @@ async function renderPanel(){
     </div>
     ${cards}
     <div id="panel-push"></div>
+    ${ayudaHtml}
     ${galeria}
     ${labHtml}
+    ${enHtml}
+    ${arteHtml}
     <div class="panel-card">
       <div class="section-h" style="--c:var(--amber);margin-top:0">// Bitácora</div>
       <div style="overflow-x:auto"><table style="min-width:420px">
@@ -1042,7 +1085,7 @@ async function renderPanel(){
 
 /* ============ ARRANQUE ============ */
 (async function init(){
-  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 6 · Misiones OS';
+  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 7 · Misiones OS';
   if (location.hash === '#panel'){ show('v-panel'); }
   else show('v-pick');
   try{
@@ -1059,6 +1102,9 @@ async function renderPanel(){
 })();
 </script>
 <script src="estudio.js"></script>
+<script src="profe.js"></script>
 <script src="laboratorio.js"></script>
+<script src="english.js"></script>
+<script src="arte.js"></script>
 </body>
 </html>

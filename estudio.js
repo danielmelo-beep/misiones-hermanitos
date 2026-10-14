@@ -23,23 +23,36 @@ function mk(p, correcta, distractores){
 /* ---------- generadores ---------- */
 function q_valor(){
   const n = rnd(100, 999); const c = Math.floor(n / 100);
-  return mk(`En el número ${n}, ¿cuántas centenas hay?`, c, [c + 1, c + 2, c > 1 ? c - 1 : c + 3]);
+  const q = mk(`En el número ${n}, ¿cuántas centenas hay?`, c, [c + 1, c + 2, c > 1 ? c - 1 : c + 3]);
+  q.n = n; q.vis = `<span style="font-size:44px;letter-spacing:6px;font-weight:800">${String(n).split('').map((d, i) => `<span style="color:${['#22E4FF', '#FFB020', '#B8FF3D'][i]}">${d}</span>`).join('')}</span><br><small style="color:#9FB2D3">centenas · decenas · unidades</small>`;
+  return q;
 }
 function q_arreglo(){
   const f = rnd(2, 9), k = rnd(2, 9);
-  return mk(`Tienes ${f} filas de ${k} cucharas. ¿Cuántas cucharas hay en total?`, f * k, [f + k, f * k + f, f * k - k]);
+  const q = mk(`Tienes ${f} filas de ${k} cucharas. ¿Cuántas cucharas hay en total?`, f * k, [f + k, f * k + f, f * k - k]);
+  q.f = f; q.k = k;
+  q.vis = Array.from({ length: f }, () => Array.from({ length: k }, () => '🥄').join('')).join('<br>');
+  return q;
 }
 function q_division(){
   const d = rnd(2, 5), k = rnd(2, 9), t = d * k;
-  return mk(`Repartes ${t} galletas en partes iguales entre ${d} amigos. ¿Cuántas le tocan a cada uno?`, k, [k + 1, k + 2, k > 2 ? k - 1 : k + 3]);
+  const q = mk(`Repartes ${t} galletas en partes iguales entre ${d} amigos. ¿Cuántas le tocan a cada uno?`, k, [k + 1, k + 2, k > 2 ? k - 1 : k + 3]);
+  q.d = d; q.k = k; q.t = t;
+  q.vis = `${Array.from({ length: t }, () => '🍪').join('')}<br><span style="font-size:20px">entre</span><br>${Array.from({ length: d }, () => '🧒').join(' ')}`;
+  return q;
 }
 
 /* ---------- bancos fijos ---------- */
+function mkf(p, c, d, num, den){
+  const q = mk(p, c, d); q.frac = [num, den];
+  q.vis = `<div style="width:96px;height:96px;border-radius:50%;margin:0 auto;border:3px solid #E8F1FF;background:repeating-conic-gradient(#0D1322 0 2deg,transparent 2deg ${360 / den}deg),conic-gradient(#FF3D8B 0 ${num / den * 360}deg,#2A3550 0)"></div><small style="color:#9FB2D3">rosado = lo que te comes</small>`;
+  return q;
+}
 const FRAC = [
-  mk('Una pizza en 4 partes iguales, comes 1. ¿Qué fracción comiste?', '1/4', ['1/2', '4/1', '3/4']),
-  mk('Una arepa en 2 mitades, comes 1. ¿Qué fracción comiste?', '1/2', ['2/1', '1/4', '2/2']),
-  mk('Un chocolate en 8 pedazos, comes 2. ¿Qué fracción comiste?', '2/8', ['8/2', '1/8', '2/4']),
-  mk('Un pastel en 3 partes iguales, te llevas 1. ¿Qué fracción?', '1/3', ['3/1', '1/2', '3/3']),
+  mkf('Una pizza en 4 partes iguales, comes 1. ¿Qué fracción comiste?', '1/4', ['1/2', '4/1', '3/4'], 1, 4),
+  mkf('Una arepa en 2 mitades, comes 1. ¿Qué fracción comiste?', '1/2', ['2/1', '1/4', '2/2'], 1, 2),
+  mkf('Un chocolate en 8 pedazos, comes 2. ¿Qué fracción comiste?', '2/8', ['8/2', '1/8', '2/4'], 2, 8),
+  mkf('Un pastel en 3 partes iguales, te llevas 1. ¿Qué fracción?', '1/3', ['3/1', '1/2', '3/3'], 1, 3),
 ];
 const FIG = [
   mk('¿Qué figura tiene 4 lados iguales y 4 esquinas?', 'Cuadrado', ['Triángulo', 'Círculo', 'Pentágono']),
@@ -95,6 +108,53 @@ const LECCIONES = [
     aprende:'Un programa es una lista de instrucciones. El robot solo hace lo que le das, paso a paso, y si te equivocas en un paso, el resultado cambia.',
     casa:'Antes de jugar, di en voz alta el camino de tu cuarto a la cocina usando “adelante, izquierda, derecha”.' },
 ];
+
+/* ---------- ayudas del Profe por lección ---------- */
+const AYUDAS_LEC = {
+  valor: { ejemplo: '352 = 300 + 50 + 2. El 3 vale 300 porque está en el lugar de las centenas.',
+    otra: 'Piensa en billetes: 3 billetes de 100, 5 billetes de 10 y 2 monedas de 1 forman 352.',
+    pistas: (q) => ['Las centenas son el primer número de la izquierda.', `Mira el ${q.n}: el primer número de la izquierda es ${String(q.n)[0]}. Ese es el número de centenas.`] },
+  arreglos: { ejemplo: '3 filas de 4 cucharas: 4 + 4 + 4 = 12. Por eso 3 × 4 = 12.',
+    otra: 'Multiplicar es una suma rápida. En vez de sumar muchas veces, usas ×.',
+    pistas: (q) => ['Multiplicar es sumar el mismo número varias veces.', `Cuenta las cucharas de una fila y suma esa cantidad una vez por cada fila: ${Array(q.f).fill(q.k).join(' + ')}.`] },
+  tablas: { ejemplo: '7 × 3 = 7 + 7 + 7 = 21.', otra: 'Si no te acuerdas, suma. 7 × 3 es contar de 7 en 7: 7, 14, 21.', pistas: () => [] },
+  division: { ejemplo: '12 galletas entre 3 amigos: das una a cada uno, y otra, y otra, hasta que no queden. A cada uno le tocan 4. 12 ÷ 3 = 4.',
+    otra: 'Dividir es lo contrario de multiplicar. Como 3 × 4 = 12, entonces 12 ÷ 3 = 4.',
+    pistas: (q) => ['Dividir es repartir en partes iguales, como repartir cartas una a una.', `Piensa: ¿${q.d} × cuánto = ${q.t}? Ese número es lo que le toca a cada uno.`] },
+  fracciones: { ejemplo: 'Una pizza en 4 partes iguales. Si comes 1, comiste 1/4. Abajo va en cuántas partes se cortó y arriba cuántas comiste.',
+    otra: 'Imagina una barra de chocolate. El número de abajo es en cuántos pedazos la partiste. El de arriba, cuántos te comiste.',
+    pistas: (q) => ['El número de abajo dice en cuántas partes iguales se cortó. El de arriba, cuántas tomas.', q.frac ? `Se cortó en ${q.frac[1]} partes y se tomó ${q.frac[0]}. Entonces se escribe ${q.frac[0]}/${q.frac[1]}.` : 'Cuenta las partes con el dedo.'] },
+  figuras: { ejemplo: 'Una pelota es un círculo (no tiene esquinas). Un pañuelo es un cuadrado (4 lados iguales). Una puerta es un rectángulo.',
+    otra: 'Cuenta los lados con el dedo: 3 lados es un triángulo, 4 lados es un cuadrado o un rectángulo, y si no tiene esquinas es un círculo.',
+    pistas: () => ['Piensa en un objeto que conozcas con esa forma: una pelota, una puerta, un pañuelo.', 'Cuenta los lados y las esquinas con el dedo.'] },
+  sis1: { ejemplo: 'Una licuadora es un sistema: tiene vaso, cuchilla y motor. Todas las partes trabajan juntas para licuar.',
+    otra: 'Un sistema es como un equipo de fútbol: cada jugador hace su parte y juntos logran algo.',
+    pistas: () => ['Lee la pregunta despacio. Quita las opciones que no tengan sentido.', 'Piensa en un ejemplo de tu casa: la cocina, el baño o el computador.'] },
+  sis2: { ejemplo: 'Algoritmo para lavarte las manos: 1) abrir la llave 2) mojar 3) poner jabón 4) frotar 5) enjuagar 6) secar.',
+    otra: 'Un algoritmo es una receta. Si cambias el orden de los pasos, no funciona igual.',
+    pistas: () => ['Un algoritmo son pasos EN ORDEN. Busca la opción que hable de pasos.', 'Piensa en una receta de cocina: ¿importa el orden?'] },
+  robot: { ejemplo: 'Si el robot está abajo y la meta está arriba, necesita pasos hacia ARRIBA (↑). Cada flecha mueve una casilla.',
+    otra: 'Es como dar instrucciones a un amigo con los ojos cerrados: dile paso a paso hacia dónde ir.', pistas: () => [] },
+};
+function descartarOpciones(q){
+  const malas = [...document.querySelectorAll('.opt')].filter(b => b.dataset.o !== q.c && !b.disabled);
+  shuffle(malas).slice(0, 2).forEach(b => { b.disabled = true; b.style.opacity = '.25'; });
+  return 'Quité dos opciones que no son. Ahora elige entre las que quedan.';
+}
+// Camino más corto del robot (para dar pistas paso a paso)
+function caminoRobot(){
+  const q = [[INICIO[0], INICIO[1], []]], vis = new Set([INICIO.join(',')]);
+  while (q.length){
+    const [r, c, ruta] = q.shift();
+    if (r === META[0] && c === META[1]) return ruta;
+    for (const [f, [dr, dc]] of Object.entries(FLECHA)){
+      const nr = r + dr, nc = c + dc, k = nr + ',' + nc;
+      if (nr < 0 || nc < 0 || nr > 4 || nc > 4 || MAPA[nr][nc] || vis.has(k)) continue;
+      vis.add(k); q.push([nr, nc, [...ruta, f]]);
+    }
+  }
+  return [];
+}
 
 /* ---------- progreso (local por niño + registro en la base) ---------- */
 function estGet(){
@@ -183,29 +243,50 @@ function vistaAprende(){
       <button class="btn" id="est-reto" style="width:100%;margin-top:18px">¡A EL RETO! ⚔️</button>
     </div>`;
   $('#est-reto').onclick = vistaPregunta;
+  const A = AYUDAS_LEC[l.id] || {};
+  profeContexto({
+    titulo: l.t, explica: `${l.aprende}\n\nHazlo en casa: ${l.casa}`, voz: `${l.aprende} Hazlo en casa. ${l.casa}`,
+    ejemplo: A.ejemplo, otra: A.otra,
+    pistas: ['Lee "Aprende" despacio, dos veces. Puedes tocar Léemelo para escucharlo.', 'Haz lo de "Hazlo en casa" con cosas reales. Así se entiende de verdad.', 'Cuando lo entiendas, toca "¡A el reto!".'],
+  });
 }
 
 function vistaPregunta(){
   const q = EST.qs[EST.idx];
+  EST.fallos = 0;
   $('#est-body').innerHTML = `
     <div class="panel-card">
       <div class="gait-steps">${EST.qs.map((_,i) => `<i class="${i < EST.idx ? 'ok' : (i === EST.idx ? 'now' : '')}"></i>`).join('')}</div>
       <div class="bungee" style="font-size:13px;color:var(--muted);text-align:center">RETO ${EST.idx+1} DE ${EST.qs.length}</div>
       <p style="font-weight:800;font-size:20px;text-align:center;margin:14px 0">${esc(q.p)}</p>
+      ${q.vis ? `<div style="text-align:center;font-size:22px;line-height:1.4;margin:0 0 14px;word-break:break-all">${q.vis}</div>` : ''}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         ${q.ops.map(o => `<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}
       </div>
       <div id="est-fb" style="text-align:center;font-weight:800;min-height:26px;margin-top:12px"></div>
     </div>`;
   document.querySelectorAll('.opt').forEach(b => b.onclick = () => responder(b, q));
+  const A = AYUDAS_LEC[EST.lec.id] || {};
+  profeContexto({
+    titulo: `${EST.lec.t} · reto ${EST.idx + 1}`,
+    explica: 'Lee la pregunta con calma. Elige la respuesta que crees correcta. Si te equivocas, puedes intentar otra vez. Si no sabes, pide una pista.',
+    voz: q.p, autoVoz: q.p, glosarioTexto: q.p,
+    ejemplo: A.ejemplo, otra: A.otra,
+    pistas: [...(A.pistas ? A.pistas(q) : []), () => descartarOpciones(q)],
+  });
 }
 
 function responder(btn, q){
   const ok = btn.dataset.o === q.c;
+  if (!ok && EST.fallos < 1){
+    EST.fallos++; btn.disabled = true; btn.classList.add('bad');
+    $('#est-fb').textContent = 'Casi. Prueba otra vez o pide una pista 💡';
+    return;
+  }
   document.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (b.dataset.o === q.c) b.classList.add('ok'); });
-  if (ok){ EST.score++; lanzarConfetti('#b6ff3b'); }
-  else btn.classList.add('bad');
-  $('#est-fb').textContent = ok ? '¡Correcto! 🎉' : `La respuesta era ${q.c}. ¡Sigue!`;
+  if (ok && EST.fallos === 0){ EST.score++; lanzarConfetti('#b6ff3b'); }
+  else if (!ok) btn.classList.add('bad');
+  $('#est-fb').textContent = ok ? (EST.fallos === 0 ? '¡Correcto! 🎉' : '¡Ahora sí! Bien hecho 💪') : `La respuesta era ${q.c}. ¡Sigue, vas bien!`;
   setTimeout(() => { EST.idx++; EST.idx < EST.qs.length ? vistaPregunta() : vistaResultado(EST.score, EST.qs.length, Math.ceil(EST.qs.length * 0.66), EST.lec.id, () => abrirLeccion(EST.lec.id)); }, 1400);
 }
 
@@ -260,6 +341,17 @@ function vistaTabla(){
   $('#tabla-ok').onclick = go;
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
   inp.focus();
+  const A = AYUDAS_LEC.tablas;
+  profeContexto({
+    titulo: 'Tablas de multiplicar',
+    explica: `Escribe cuánto es ${c.a} × ${c.b}. Si no te acuerdas, puedes sumar.`, voz: `¿Cuánto es ${c.a} por ${c.b}?`, autoVoz: `¿Cuánto es ${c.a} por ${c.b}?`,
+    ejemplo: A.ejemplo, otra: A.otra,
+    pistas: [
+      `${c.a} × ${c.b} quiere decir sumar el ${c.a}, ${c.b} veces.`,
+      `Suma así: ${Array(c.b).fill(c.a).join(' + ')} = ?`,
+      `Cuenta de ${c.a} en ${c.a}: ${Array.from({ length: c.b }, (_, i) => c.a * (i + 1)).join(', ')}. El último número es la respuesta.`,
+    ],
+  });
 }
 
 function responderTabla(v){
@@ -292,7 +384,7 @@ function iniciarRobot(){
   EST.prog = []; EST.pos = [...INICIO];
   $('#est-body').innerHTML = `
     <div class="panel-card" style="text-align:center">
-      <div class="bungee" style="font-size:20px;color:var(--cyan)">🤖 PROGRAMA A FRANK</div>
+      <div class="bungee" style="font-size:20px;color:var(--cyan)">🤖 PROGRAMA AL ROBOT</div>
       <p style="font-weight:700;margin:8px 0 12px">Llévalo de 🦖 a 🏁 sin chocar con los 🧱. Toca las flechas en orden.</p>
       <div class="tablero" id="tablero"></div>
       <div class="prog" id="prog"></div>
@@ -309,6 +401,19 @@ function iniciarRobot(){
   $('#rob-borrar').onclick = () => { EST.prog = []; EST.pos = [...INICIO]; pintarPrograma(); drawTablero(); $('#est-fb').textContent=''; };
   $('#rob-run').onclick = ejecutarRobot;
   pintarPrograma(); drawTablero();
+  const ruta = caminoRobot(), A = AYUDAS_LEC.robot;
+  profeContexto({
+    titulo: 'Programa al robot',
+    explica: 'Mueve al robot hasta la bandera 🏁 sin chocar con los muros 🧱. Toca las flechas en orden. Cada flecha es un paso. Luego toca Ejecutar.',
+    voz: 'Mueve al robot hasta la bandera sin chocar con los muros. Toca las flechas en orden. Cada flecha es un paso. Luego toca ejecutar.',
+    ejemplo: A.ejemplo, otra: A.otra,
+    pistas: [
+      'Mira dónde está el robot (abajo a la izquierda) y dónde está la bandera (arriba a la derecha).',
+      () => `Empieza con estos pasos: ${ruta.slice(0, 2).join(' ')}`,
+      () => `Sigue con estos: ${ruta.slice(0, 5).join(' ')}`,
+      () => `Una solución completa es: ${ruta.join(' ')}`,
+    ],
+  });
 }
 
 function pintarPrograma(){
@@ -353,7 +458,7 @@ function ejecutarRobot(){
     const [dr, dc] = FLECHA[EST.prog[i]];
     const nr = EST.pos[0] + dr, nc = EST.pos[1] + dc;
     if (nr < 0 || nc < 0 || nr > 4 || nc > 4 || MAPA[nr][nc]){
-      $('#est-fb').textContent = `¡Choque! 🧱 Revisa el paso ${i+1}`;
+      $('#est-fb').textContent = `¡Choque! 🧱 Revisa el paso ${i+1}. Pide una pista si quieres.`;
       reiniciar();
       return;
     }

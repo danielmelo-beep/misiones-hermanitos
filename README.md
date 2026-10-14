@@ -10,6 +10,9 @@ La app de tareas, estudio y entrenamiento de Frank y Valentina, hecha con cariñ
 - **Entrenamiento de Marcha** (solo para Frank). Es una plantilla: el fisioterapeuta debe revisarla y ajustarla.
 - **Recordatorios y horarios** (como Duolingo): avisos en el celular a la hora de bañarse (máximo 9:00 a. m.), tender la cama (9:30 a. m.), dejar uniforme y zapatos listos el día anterior (7:30 p. m., domingo a jueves) y hacer el aseo durante el día. Quien llega a tiempo gana +5 XP. Daniel recibe una alerta si alguno se pasa de la hora.
 - **Laboratorio de Sistemas** (solo Frank): 5 laboratorios con pasos, registro de técnico, quiz y fotos de evidencia: conocer el equipo, probar con método, mantenimiento por dentro, mantenimiento del software y un caso de servicio técnico. Sube de rango: Aprendiz → Técnico junior → Técnico de sistemas → Ingeniero en práctica.
+- **Profe** (para estudiar solos): botón de ayuda en cada pantalla de estudio. Lee en voz alta, da pistas de menos a más, muestra un ejemplo resuelto, explica de otra forma, explica palabras nuevas y permite **avisar a Daniel** (te llega una notificación). Tiene letra grande y lectura automática de preguntas.
+- **English Club** (los dos): inglés desde cero con voz, cómo se pronuncia, ejercicios de escuchar, leer, decir y armar frases. Frank tiene unidades de computador y videojuegos; Valentina, de princesas y arte.
+- **Taller de Arte** (Valentina): 6 dibujos originales para colorear con retos en inglés ("Color the crown yellow"), dibujo libre con stickers y galería. Los dibujos guardados los ves en el panel. La app de Valentina tiene su propio tema.
 - **Centro de Mando** para Daniel: `index.html#panel` + PIN. Ve el progreso de hoy, la semana, las fotos y la bitácora.
 
 ## Primeros pasos de ingeniería (para Frank)
@@ -43,6 +46,7 @@ Los avisos salen de una función de Supabase (`enviar-recordatorios`) que corre 
 - `index.html`: la app (diseño Misiones OS).
 - `estudio.js`: Ruta del Tercero.
 - `laboratorio.js`: Laboratorio de Sistemas (Frank).
+- `profe.js`: el Profe (ayuda guiada). `english.js`: English Club. `arte.js`: Taller de Arte.
 - `sw.js` y `manifest.webmanifest`: instalación y uso sin conexión.
 - `schema.sql`: tablas base de Supabase.
 

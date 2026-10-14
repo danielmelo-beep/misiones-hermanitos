@@ -15,6 +15,7 @@ const LAB_RANGOS = [
 /* Los pasos están pensados para un computador con Windows. Si el tuyo es otro, Daniel te ayuda a adaptarlos. */
 const LABS = [
   {
+    ayuda: { ejemplo: "Ejemplo de registro: Procesador: Intel Core i5. RAM: 8 GB. Disco: SSD de 256 GB con 80 GB libres. Todo eso lo ves en la pestaña Rendimiento.", otra: "Es como llenar la ficha de un jugador de videojuegos: nombre, fuerza, velocidad. Aquí la ficha es del computador.", pistas: ["Presiona las teclas Ctrl, Shift y Esc al mismo tiempo. Se abre una ventana llamada Administrador de tareas.", "Arriba toca \"Rendimiento\". A la izquierda verás CPU, Memoria y Disco. Toca cada una para ver sus datos.", "Si tu computador no es Windows o no puedes abrirlo, avisa a Daniel y haz el laboratorio con él."] },
     id: 'L1', emoji: '🔍', titulo: 'Conoce tu equipo', minutos: 20,
     idea: 'Un técnico siempre empieza por saber QUÉ tiene delante. Todo computador tiene un cerebro (procesador), una memoria de trabajo (RAM), un lugar donde guarda todo (disco) y una placa que los conecta (tarjeta madre).',
     pasos: [
@@ -36,6 +37,7 @@ const LABS = [
     ],
   },
   {
+    ayuda: { ejemplo: "Hipótesis: \"Creo que mi PC tarda 60 segundos en encender.\" Prueba: cronometro. Resultado: tardó 45 segundos. Conclusión: tardó menos de lo que pensaba.", otra: "Un científico primero adivina y después comprueba. Adivinar no es malo: lo importante es comprobar.", pistas: ["Para cronometrar usa el reloj del celular. Empieza cuando presionas el botón de encendido.", "Para el ping: toca Inicio, escribe cmd y Enter. Luego escribe ping 8.8.8.8 y Enter. Mira la última línea: dice el promedio en ms.", "Si no puedes abrir cmd, anota que no pudiste y cuéntale a Daniel. Sigue con las otras pruebas."] },
     id: 'L2', emoji: '🧪', titulo: 'Probar con método', minutos: 25,
     idea: 'Un técnico no adivina: prueba. El método es siempre el mismo: 1) Pregunta, 2) Hipótesis (lo que crees que pasará), 3) Prueba, 4) Resultado, 5) Conclusión. Así encuentras el problema sin dañar nada.',
     pasos: [
@@ -58,6 +60,7 @@ const LABS = [
     ],
   },
   {
+    ayuda: { ejemplo: "Anota algo así: \"Había mucho polvo en la rejilla de atrás. Al encender sonó más suave.\"", otra: "Es como limpiar los filtros de una aspiradora: si están tapados, no funciona bien.", pistas: ["Pide a Daniel o a un adulto que esté contigo. Primero apaga y desenchufa todo.", "Tocar el metal del chasis antes de tocar las piezas quita la estática de tu cuerpo.", "Si no hay un adulto cerca ahora, haz este laboratorio después. No abras nada solo."] },
     id: 'L3', emoji: '🧹', titulo: 'Mantenimiento por dentro', minutos: 30,
     idea: 'El polvo es el enemigo número uno: tapa los ventiladores, el equipo se calienta, se pone lento y puede apagarse. El mantenimiento preventivo es limpiar ANTES de que falle. Por seguridad, este laboratorio se hace siempre con un adulto al lado.',
     pasos: [
@@ -80,6 +83,7 @@ const LABS = [
     ],
   },
   {
+    ayuda: { ejemplo: "Antes: 35 GB libres. Después de borrar temporales: 41 GB libres. Programas de inicio: 7.", otra: "Es como ordenar tu cuarto: sacas lo que no usas para que haya espacio y encuentres todo más rápido.", pistas: ["En el menú Inicio escribe la palabra \"almacenamiento\" y ábrelo.", "Para ver los programas de inicio: Ctrl + Shift + Esc y luego la pestaña \"Inicio\".", "Si dudas si borrar algo, NO lo borres. Pregúntale a Daniel."] },
     id: 'L4', emoji: '💾', titulo: 'Mantenimiento del software', minutos: 30,
     idea: 'La parte "invisible" del computador también se desgasta: programas que sobran, archivos temporales, actualizaciones pendientes y virus. Un buen técnico limpia, actualiza y SIEMPRE hace una copia de seguridad antes de tocar nada importante.',
     pasos: [
@@ -102,6 +106,7 @@ const LABS = [
     ],
   },
   {
+    ayuda: { ejemplo: "Problema: el PC estaba lento. Probé: 1) revisar el espacio, 2) cerrar programas, 3) reiniciar. Solución: liberé 10 GB y quedó más rápido.", otra: "Un técnico es como un doctor de computadores: pregunta qué le pasa, revisa lo más fácil primero y después lo más difícil.", pistas: ["Escoge un problema pequeño y real: una pantalla sucia, un cable flojo, un programa lento.", "Escribe tres cosas: qué pasaba, qué probaste y cómo quedó.", "Si no se te ocurre un caso, pregunta a Daniel qué equipo de la casa tiene un problema."] },
     id: 'L5', emoji: '🎫', titulo: 'Caso de servicio técnico', minutos: 25,
     idea: 'Ahora trabajas de verdad: un cliente te trae su equipo y tú decides qué probar primero. Un técnico va de lo más sencillo y barato a lo más complejo. Y siempre escribe un informe para que el cliente entienda.',
     pasos: [
@@ -183,6 +188,13 @@ function openLab(){
 
 function renderLabMapa(){
   state.labActual = null;
+  profeContexto({
+    titulo: 'Laboratorio de Sistemas',
+    explica: 'Cada laboratorio te enseña algo de los computadores haciendo cosas de verdad. Abre el que está libre, sigue los pasos en orden, anota lo que encuentres y responde el quiz.',
+    voz: 'Cada laboratorio te enseña algo de los computadores haciendo cosas de verdad. Abre el que está libre, sigue los pasos en orden, anota lo que encuentres y responde el quiz.',
+    otra: 'Es como un juego por niveles. Cada nivel es una práctica con tu computador. Cuando pasas uno, se abre el siguiente.',
+    pistas: ['Toca el laboratorio que no tiene candado.', 'Si no puedes con un paso, pide una pista adentro del laboratorio o avisa a Daniel.'],
+  });
   const n = labHechos().length;
   const r = labRango(n);
   const sig = LABS.findIndex(l => !labInfo(l.id).hecho);
@@ -214,6 +226,11 @@ function abrirLab(id){
   if (!lab) return;
   state.labActual = id;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  profeContexto({
+    titulo: 'Laboratorio: ' + lab.titulo, explica: lab.idea + '\n\nHaz los pasos en orden y marca cada casilla cuando termines. Al final escribe tu registro y responde el quiz.',
+    voz: lab.idea, glosarioTexto: lab.pasos.map(p => p.t + ' ' + p.d).join(' '),
+    ejemplo: lab.ayuda && lab.ayuda.ejemplo, otra: lab.ayuda && lab.ayuda.otra, pistas: (lab.ayuda && lab.ayuda.pistas) || [],
+  });
   const info = labInfo(id);
   const hecho = info.hecho;
   const num = LABS.indexOf(lab) + 1;
