@@ -10,6 +10,10 @@ La app de tareas, estudio y entrenamiento de Frank y Valentina, hecha con cariñ
 - **Entrenamiento de Marcha** (solo para Frank). Es una plantilla: el fisioterapeuta debe revisarla y ajustarla.
 - **Centro de Mando** para Daniel: `index.html#panel` + PIN. Ve el progreso de hoy, la semana, las fotos y la bitácora.
 
+## Primeros pasos de ingeniería (para Frank)
+
+La carpeta [`ingenieria-frank`](ingenieria-frank/README.md) tiene una ruta de 8 pasos con ejercicios y dos proyectos para empezar a aprender sistemas: qué es un computador, algoritmos, HTML, JavaScript, Git y un primer juego.
+
 ## Cómo instalarla en el celular
 
 1. Abre el enlace de la app (GitHub Pages) en el navegador del celular.

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adivina el número</title>
+  <style>
+    body { font-family: sans-serif; max-width: 420px; margin: 40px auto; padding: 0 16px; text-align: center; }
+    input, button { font-size: 20px; padding: 10px; margin: 6px; }
+  </style>
+</head>
+<body>
+
+  <h1>Adivina el número</h1>
+  <p>Pensé un número del 1 al 100. ¿Cuál es?</p>
+
+  <!-- ENTRADA: aquí escribe el jugador -->
+  <input id="intento" type="number" min="1" max="100">
+  <button id="probar">Probar</button>
+
+  <!-- SALIDA: aquí aparece el mensaje -->
+  <p id="mensaje"></p>
+
+<script>
+// 1) La computadora "piensa" un número secreto del 1 al 100 (una VARIABLE)
+let secreto = Math.floor(Math.random() * 100) + 1;
+
+// 2) Otra variable para contar los intentos
+let intentos = 0;
+
+// 3) Buscamos las piezas de la página para poder usarlas
+const caja = document.getElementById("intento");
+const boton = document.getElementById("probar");
+const mensaje = document.getElementById("mensaje");
+
+// 4) Cuando el jugador toca "Probar", se ejecuta esta función
+boton.onclick = function () {
+  let numero = Number(caja.value);   // lo que escribió el jugador
+  intentos = intentos + 1;
+
+  // 5) DECISIÓN: comparamos el número del jugador con el secreto
+  if (numero === secreto) {
+    mensaje.textContent = "¡Lo lograste en " + intentos + " intentos!";
+  } else if (numero < secreto) {
+    mensaje.textContent = "Muy bajo. Prueba con uno más grande.";
+  } else {
+    mensaje.textContent = "Muy alto. Prueba con uno más pequeño.";
+  }
+};
+</script>
+
+</body>
+</html>
