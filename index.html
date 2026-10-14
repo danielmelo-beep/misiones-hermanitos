@@ -1052,6 +1052,40 @@ async function renderPanel(){
       <td>${r.foto_url ? '📸' : '—'}</td></tr>`;
   }).join('');
 
+  /* Seguimiento: cumplimiento y puntualidad de los últimos 7 días */
+  let estudioRows = [];
+  try {
+    const { data: pe } = await sb.from('progreso_estudio').select('nino_id, leccion, created_at').order('created_at', { ascending: false }).limit(500);
+    estudioRows = pe || [];
+  } catch(e){ console.error(e); }
+  const seguimientoHtml = state.ninos.map(n => {
+    const mine = rows.filter(r => r.nino_id === n.id);
+    let esperadas = 0;
+    for (let i = 0; i < 7; i++){
+      const d = new Date(); d.setDate(d.getDate() - i);
+      esperadas += state.misiones.filter(m => !m.dias || m.dias.includes(d.getDay())).length;
+    }
+    const hechas = mine.length;
+    const pct = esperadas ? Math.min(100, Math.round(hechas / esperadas * 100)) : 0;
+    const conLimite = mine.filter(r => misionMap.get(r.mision_id)?.hora_limite);
+    const puntual = conLimite.filter(r => aTiempo(r, misionMap.get(r.mision_id))).length;
+    const pctT = conLimite.length ? Math.round(puntual / conLimite.length * 100) : null;
+    const ult = mine[0] ? new Date(mine[0].created_at) : null;
+    const sinActividad = ult ? Math.floor((Date.now() - ult.getTime()) / 86400000) : null;
+    const est = estudioRows.filter(e => e.nino_id === n.id);
+    const cuenta = (p) => est.filter(e => (e.leccion || '').startsWith(p)).length;
+    const alerta = sinActividad === null || sinActividad >= 2
+      ? `<div style="margin-top:8px;color:var(--pink);font-weight:600;font-size:14px">⚠️ ${sinActividad === null ? 'Sin misiones esta semana' : 'Lleva ' + sinActividad + ' días sin completar misiones'}</div>` : '';
+    const barra = (v, c) => `<div style="height:8px;border-radius:4px;background:var(--line2);overflow:hidden"><div style="width:${v}%;height:100%;background:${c}"></div></div>`;
+    return `<div class="panel-card" style="border-color:${esc(n.color)}88">
+      <div class="section-h" style="--c:${esc(n.color)};margin-top:0">// Seguimiento · ${esc(n.nombre)}</div>
+      <div style="font-size:14px;font-weight:500">Cumplimiento 7 días: <b>${hechas}/${esperadas}</b> (${pct}%)</div>${barra(pct, 'var(--lime)')}
+      <div style="font-size:14px;font-weight:500;margin-top:8px">A tiempo: <b>${pctT === null ? '—' : puntual + '/' + conLimite.length + ' (' + pctT + '%)'}</b></div>${pctT === null ? '' : barra(pctT, 'var(--cyan)')}
+      <div style="color:var(--muted);font-family:var(--m);font-size:12px;margin-top:8px">Última misión: ${ult ? esc(ult.toLocaleString('es-CO')) : '—'}<br>Estudio: ${cuenta('en:') ? cuenta('en:') + ' de inglés · ' : ''}${cuenta('lab:') ? cuenta('lab:') + ' labs · ' : ''}${cuenta('arte:') ? cuenta('arte:') + ' dibujos · ' : ''}${est.filter(e => !/^(en|lab|arte):/.test(e.leccion || '')).length} lecciones/retos</div>
+      ${alerta}
+    </div>`;
+  }).join('');
+
   const labHtml = (typeof renderPanelLab === 'function') ? await renderPanelLab() : '';
   const enHtml = (typeof renderPanelEnglish === 'function') ? await renderPanelEnglish() : '';
   const arteHtml = (typeof renderPanelArte === 'function') ? await renderPanelArte() : '';
@@ -1067,6 +1101,7 @@ async function renderPanel(){
       <button class="btn ghost" id="panel-exit">Salir</button>
     </div>
     ${cards}
+    ${seguimientoHtml}
     <div id="panel-push"></div>
     ${ayudaHtml}
     ${galeria}
@@ -1086,7 +1121,7 @@ async function renderPanel(){
 
 /* ============ ARRANQUE ============ */
 (async function init(){
-  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 7 · Misiones OS';
+  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 8 · Misiones OS';
   if (location.hash === '#panel'){ show('v-panel'); }
   else show('v-pick');
   try{
