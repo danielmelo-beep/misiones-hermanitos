@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Misiones · Frank & Valentina</title>
 <meta name="theme-color" content="#0b0620" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Misiones" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet" />
@@ -141,6 +146,12 @@
     font-family:'Baloo 2';font-size:20px;font-weight:800;text-align:center;letter-spacing:6px}
   .btn{background:var(--cyan);color:#00222a;border:0;border-radius:14px;padding:12px 18px;font-family:'Bungee';font-size:14px;cursor:pointer}
   .btn.ghost{background:none;color:var(--muted);border:2px solid #ffffff33;font-family:'Baloo 2';font-weight:800}
+  /* Módulo de marcha */
+  .gait-warn{font-weight:800;font-size:13px;color:#ffbb7a;background:#ff7a0018;border:2px dashed #ff7a00;border-radius:14px;padding:10px 12px;margin-bottom:14px}
+  .gait-steps{display:flex;gap:6px;justify-content:center;margin:6px 0 14px;flex-wrap:wrap}
+  .gait-steps i{width:12px;height:12px;border-radius:50%;background:#ffffff22;display:block}
+  .gait-steps i.ok{background:var(--lime);box-shadow:0 0 8px var(--lime)}
+  .gait-steps i.now{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
   .hidden{display:none !important}
   .photo-input{display:none}
 </style>
@@ -167,8 +178,18 @@
     <div class="section-h" style="--c:var(--lime)">🎯 MISIONES DE HOY</div>
     <div class="missions" id="missions"></div>
 
+    <div id="gait-entry"></div>
     <div class="section-h" style="--c:var(--yellow)">🏆 INSIGNIAS</div>
     <div class="badges" id="badges"></div>
+  </section>
+
+  <!-- PANTALLA: módulo de marcha (Frank) -->
+  <section id="v-gait" class="hidden">
+    <div class="section-h" style="--c:var(--cyan)">🦿 ENTRENAMIENTO DE MARCHA</div>
+    <div class="gait-warn">⚠️ Esta es una plantilla. Si sientes dolor, para. Pide que su fisioterapeuta revise y ajuste los ejercicios.</div>
+    <div id="gait-body"></div>
+    <div id="gait-semana" style="margin-top:14px"></div>
+    <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="gait-back">← VOLVER A MISIONES</button></div>
   </section>
 
   <!-- PANTALLA: panel de padres -->
@@ -210,7 +231,7 @@ function toast(msg, err=false){
   const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err?' err':'');
   clearTimeout(toast._t); toast._t = setTimeout(()=> t.className='toast', 2600);
 }
-function show(id){ ['v-pick','v-play','v-panel'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id)); window.scrollTo({top:0,behavior:'smooth'}); }
+function show(id){ ['v-pick','v-play','v-panel','v-gait'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id)); window.scrollTo({top:0,behavior:'smooth'}); }
 
 /* ============ DATOS ============ */
 async function loadBase(){
@@ -316,6 +337,7 @@ function renderPlay(){
     if (m) porMision.set(m.nombre, (porMision.get(m.nombre)||0)+1);
   });
   const stats = { total: state.completados.length, racha, nivel, porMision };
+  renderGaitEntry();
   $('#badges').innerHTML = INSIGNIAS.map(b => {
     const on = b.cond(stats);
     return `<div class="badge ${on?'on':''}"><div class="bi">${b.icon}</div><div class="bn">${esc(b.nombre)}</div></div>`;
@@ -388,6 +410,145 @@ function lanzarConfetti(color){
   confetti({ particleCount: 140, spread: 80, origin: { y: .45 }, colors });
   setTimeout(()=> confetti({ particleCount: 60, angle: 60, spread: 55, origin: { x: 0 }, colors }), 220);
   setTimeout(()=> confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1 }, colors }), 220);
+}
+
+/* ============ MÓDULO ESPECIAL: MARCHA (Frank) ============ */
+// PLANTILLA: los tiempos y ejercicios los debe ajustar su fisioterapeuta.
+const GAIT_PLAN = [
+  { t:'Calentamiento', d:'Sentado, mueve tobillos y rodillas suave. Respira normal.', s:120 },
+  { t:'Pedal de ejercicio', d:'Pedalea con ritmo parejo, sin forzar. Usa el pedal que compraste.', s:300 },
+  { t:'Pasos con apoyo', d:'Camina despacio, 10 pasos, apoyado en la pared o el barandal. Cuenta en voz alta.', s:90 },
+  { t:'Equilibrio', d:'De pie, apoyado con una mano. Levanta un pie 5 segundos y cambia.', s:60 },
+  { t:'Pantorrillas', d:'De pie frente a la pared: empuja suave y mantén 20 segundos por pierna.', s:60 },
+  { t:'Enfriamiento', d:'Respira profundo: inhala 4 segundos, exhala 6. Relájate.', s:60 },
+];
+const gait = { idx:0, left:null, timer:null, running:false, hechos:[] };
+
+function fmtTiempo(sec){ const m=Math.floor(sec/60), s=sec%60; return `${m}:${String(s).padStart(2,'0')}`; }
+function minutosGait(){
+  return Math.round(GAIT_PLAN.filter((_,i)=>gait.hechos.includes(i)).reduce((a,p)=>a+p.s,0)/60);
+}
+function stopGait(){ clearInterval(gait.timer); gait.timer=null; gait.running=false; }
+
+function renderGaitEntry(){
+  const box = $('#gait-entry');
+  if (!box) return;
+  if (!state.nino || state.nino.nombre !== 'Frank'){ box.innerHTML=''; return; }
+  box.innerHTML = `
+    <div class="section-h" style="--c:var(--cyan)">🦿 MÓDULO ESPECIAL</div>
+    <div class="missions">
+      <div class="mission" id="gait-open" style="--c:var(--cyan)">
+        <div class="em">🦿</div>
+        <h3>Entrenamiento de Marcha</h3>
+        <p>Pedal, pasos con apoyo y equilibrio. Un paso a la vez.</p>
+        <div class="chips"><span class="chip cam">⏱ ~12 min</span></div>
+      </div>
+    </div>`;
+  $('#gait-open').onclick = openGait;
+}
+
+function openGait(){
+  stopGait(); gait.idx=0; gait.left=null; gait.hechos=[];
+  $('#gait-back').onclick = () => { stopGait(); show('v-play'); renderPlay(); };
+  show('v-gait'); renderGaitStep(); loadGaitSemana();
+}
+
+function renderGaitStep(){
+  const body = $('#gait-body');
+  if (gait.idx >= GAIT_PLAN.length){
+    body.innerHTML = `
+      <div class="panel-card" style="text-align:center">
+        <div style="font-size:70px">🏅</div>
+        <div class="bungee" style="font-size:22px;color:var(--lime);margin:8px 0">¡ENTRENAMIENTO COMPLETO!</div>
+        <p style="color:var(--muted);font-weight:700;margin-bottom:14px">Hiciste ${minutosGait()} min de movimiento hoy.</p>
+        <button class="btn" id="gait-save" style="width:100%">GUARDAR SESIÓN</button>
+      </div>`;
+    $('#gait-save').onclick = guardarSesionGait;
+    return;
+  }
+  const s = GAIT_PLAN[gait.idx];
+  const dots = GAIT_PLAN.map((_,i)=>{
+    const cls = gait.hechos.includes(i) ? 'ok' : (i===gait.idx ? 'now' : '');
+    return `<i class="${cls}"></i>`;
+  }).join('');
+  body.innerHTML = `
+    <div class="panel-card">
+      <div class="gait-steps">${dots}</div>
+      <div class="bungee" style="font-size:24px;color:var(--cyan);text-align:center">${esc(s.t)}</div>
+      <p style="font-weight:700;margin:8px 0 14px;font-size:17px;text-align:center">${esc(s.d)}</p>
+      <div id="gait-clock" class="bungee" style="font-size:64px;text-align:center;color:var(--yellow);margin:10px 0">${fmtTiempo(gait.left ?? s.s)}</div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" id="gait-go" style="flex:1">${gait.running ? 'PAUSAR' : 'EMPEZAR'}</button>
+        <button class="btn ghost" id="gait-skip">SALTAR</button>
+      </div>
+    </div>`;
+  $('#gait-go').onclick = toggleGait;
+  $('#gait-skip').onclick = () => { stopGait(); gait.idx++; gait.left=null; renderGaitStep(); };
+}
+
+function toggleGait(){
+  if (gait.running){ stopGait(); return renderGaitStep(); }
+  const s = GAIT_PLAN[gait.idx];
+  if (gait.left == null) gait.left = s.s;
+  gait.running = true;
+  renderGaitStep();
+  gait.timer = setInterval(() => {
+    gait.left--;
+    const el = $('#gait-clock');
+    if (el) el.textContent = fmtTiempo(Math.max(gait.left,0));
+    if (gait.left <= 0){
+      stopGait();
+      gait.hechos.push(gait.idx);
+      lanzarConfetti('#b6ff3b');
+      gait.idx++; gait.left = null;
+      toast('¡Bien hecho! Siguiente paso 💪');
+      renderGaitStep();
+    }
+  }, 1000);
+}
+
+async function guardarSesionGait(){
+  if (!gait.hechos.length){ toast('Completa al menos un paso', true); return; }
+  const minutos = minutosGait();
+  try{
+    const { error } = await sb.from('sesiones_ejercicio').insert({
+      nino_id: state.nino.id, fecha: hoy(), minutos, pasos: gait.hechos.length
+    });
+    if (error) throw error;
+    lanzarConfetti('#00e5ff');
+    toast(`Sesión guardada: ${minutos} min 🦿`);
+    gait.idx=0; gait.left=null; gait.hechos=[];
+    renderGaitStep(); loadGaitSemana();
+  } catch(e){
+    console.error(e); toast('No se pudo guardar la sesión', true);
+  }
+}
+
+async function loadGaitSemana(){
+  const box = $('#gait-semana');
+  if (!box || !state.nino) return;
+  const desde = new Date(); desde.setDate(desde.getDate()-6);
+  const { data, error } = await sb.from('sesiones_ejercicio').select('fecha,minutos')
+    .eq('nino_id', state.nino.id).gte('fecha', desde.toLocaleDateString('en-CA'));
+  if (error){ box.innerHTML=''; return; }
+  const dias = [...Array(7)].map((_,i)=>{
+    const d = new Date(); d.setDate(d.getDate()-(6-i));
+    const k = d.toLocaleDateString('en-CA');
+    const m = (data||[]).filter(r=>r.fecha===k).reduce((a,r)=>a+r.minutos,0);
+    return { m, letra: d.toLocaleDateString('es-CO',{weekday:'short'}).slice(0,2) };
+  });
+  const max = Math.max(10, ...dias.map(d=>d.m));
+  box.innerHTML = `
+    <div class="panel-card">
+      <div class="bungee" style="font-size:15px;margin-bottom:10px">📈 ESTA SEMANA</div>
+      <div style="display:flex;align-items:flex-end;gap:8px;height:130px">
+        ${dias.map(d=>`<div style="flex:1;text-align:center">
+          <div style="height:${Math.round(d.m/max*100)}px;min-height:6px;border-radius:10px 10px 4px 4px;background:linear-gradient(180deg,var(--cyan),var(--violet))"></div>
+          <div style="font-size:11px;font-weight:800;color:var(--muted);margin-top:4px">${esc(d.letra)}</div>
+          <div style="font-size:11px;font-weight:800">${d.m}m</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
 }
 
 /* ============ PANEL DE PAPÁ ============ */
@@ -495,6 +656,7 @@ async function renderPanel(){
     console.error(e);
     $('#pick-grid').innerHTML = '<p style="text-align:center;color:var(--pink);font-weight:800">No pude conectar con la base. Revisa la configuración.</p>';
   }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   $('#pin').addEventListener('keydown', e => { if (e.key==='Enter') $('#pin-go').click(); });
 })();
 </script>
