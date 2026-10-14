@@ -13,6 +13,7 @@ La app de tareas, estudio y entrenamiento de Frank y Valentina, hecha con cariñ
 - **Profe** (para estudiar solos): botón de ayuda en cada pantalla de estudio. Lee en voz alta, da pistas de menos a más, muestra un ejemplo resuelto, explica de otra forma, explica palabras nuevas y permite **avisar a Daniel** (te llega una notificación). Tiene letra grande y lectura automática de preguntas.
 - **English Club** (los dos): inglés desde cero con voz, cómo se pronuncia, ejercicios de escuchar, leer, decir y armar frases. Frank tiene unidades de computador y videojuegos; Valentina, de princesas y arte.
 - **Taller de Arte** (Valentina): 6 dibujos originales para colorear con retos en inglés ("Color the crown yellow"), dibujo libre con stickers y galería. Los dibujos guardados los ves en el panel. La app de Valentina tiene su propio tema.
+- **Misión Nocturna** (los dos, domingo a jueves): el ritual de cuando llegan de estudiar. 1) *Tareas*: plan por materias con la más difícil primero, temporizador de enfoque (15 o 25 min), revisión de 4 puntos y foto del cuaderno; si no hay tareas, repaso obligatorio que Daniel ve marcado como "sin tareas". 2) *Maleta*: clases de mañana (la app recuerda las del mismo día), inventario tipo videojuego (Frank) o baúl mágico (Valentina), cremallera y foto. 3) *Sello de la noche*, noches seguidas y cofre semanal. **Noche perfecta** = tareas, maleta, uniforme y zapatos antes de las 9:00 p. m. (+10 XP). Constantes editables al inicio de `noche.js` (límite, bono, premio del cofre).
 - **Centro de Mando** para Daniel: `index.html#panel` + PIN, o el enlace “🔒 Panel de Daniel” al final de la pantalla de inicio. Ve el progreso de hoy, el seguimiento de 7 días (cumplimiento, puntualidad, días sin actividad, estudio), las fotos y la bitácora.
 
 ## Primeros pasos de ingeniería (para Frank)
@@ -46,7 +47,7 @@ Los avisos salen de una función de Supabase (`enviar-recordatorios`) que corre 
 - `index.html`: la app (diseño Misiones OS).
 - `estudio.js`: Ruta del Tercero.
 - `laboratorio.js`: Laboratorio de Sistemas (Frank).
-- `profe.js`: el Profe (ayuda guiada). `english.js`: English Club. `arte.js`: Taller de Arte.
+- `profe.js`: el Profe (ayuda guiada). `english.js`: English Club. `arte.js`: Taller de Arte. `noche.js`: Misión Nocturna (tareas y maleta).
 - `sw.js` y `manifest.webmanifest`: instalación y uso sin conexión.
 - `schema.sql`: tablas base de Supabase.
 

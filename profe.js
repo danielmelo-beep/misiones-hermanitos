@@ -201,7 +201,7 @@ function pedirAyudaDaniel(){
 }
 
 /* El botón de ayuda aparece solo en las pantallas donde se estudia */
-const PROFE_VISTAS = ['v-play', 'v-estudio', 'v-lab', 'v-ingles', 'v-arte', 'v-gait'];
+const PROFE_VISTAS = ['v-play', 'v-estudio', 'v-lab', 'v-ingles', 'v-arte', 'v-gait', 'v-noche'];
 (function(){
   profeInyectar();
   const original = show;

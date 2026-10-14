@@ -277,6 +277,7 @@
     <div class="section-h" style="--c:var(--lime)">// Misiones de hoy</div>
     <div class="missions" id="missions"></div>
 
+    <div id="noche-entry"></div>
     <div id="arte-entry"></div>
     <div id="lab-entry"></div>
     <div id="ingles-entry"></div>
@@ -293,6 +294,12 @@
     <div id="gait-body"></div>
     <div id="gait-semana" style="margin-top:14px"></div>
     <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="gait-back">← Volver a misiones</button></div>
+  </section>
+
+  <!-- PANTALLA: misión nocturna (tareas y maleta) -->
+  <section id="v-noche" class="hidden">
+    <div id="noche-body"></div>
+    <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="noche-back">← Volver a misiones</button></div>
   </section>
 
   <!-- PANTALLA: laboratorio de sistemas (Frank) -->
@@ -382,7 +389,7 @@ function toast(msg, err=false){
   const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err?' err':'');
   clearTimeout(toast._t); toast._t = setTimeout(()=> t.className='toast', 3200);
 }
-function show(id){ ['v-pick','v-play','v-panel','v-gait','v-estudio','v-lab','v-ingles','v-arte'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id));
+function show(id){ ['v-pick','v-play','v-panel','v-gait','v-estudio','v-lab','v-ingles','v-arte','v-noche'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id));
   if (id === 'v-pick' || id === 'v-panel') document.body.classList.remove('tema-valentina'); window.scrollTo({top:0,behavior:'smooth'}); }
 function vibrar(p){ try{ if (navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
@@ -445,7 +452,8 @@ const pasoLaHora = (m) => !!m.hora_limite && enBogota(new Date()).min > minDe(m.
 
 /* ============ CÁLCULOS ============ */
 function calcXp(rows){
-  return rows.reduce((acc, c) => {
+  const bonoNoche = (typeof nochesPerfectas === 'function') ? nochesPerfectas(rows).length * NOCHE_BONO : 0;
+  return bonoNoche + rows.reduce((acc, c) => {
     const m = state.misiones.find(x => x.id === c.mision_id);
     return acc + (m?.xp || 0) + (aTiempo(c, m) ? BONO_A_TIEMPO : 0);
   }, 0);
@@ -466,6 +474,10 @@ const INSIGNIAS = [
   { id:'nivel5',  icon:'👑', nombre:'Leyenda', cond: s => s.nivel >= 5 },
   { id:'loza',    icon:'🍽️', nombre:'Rey de la Loza', cond: s => s.porMision.get('Misión Loza') >= 5 },
   { id:'tablas',  icon:'🧠', nombre:'Genio de Tablas', cond: s => s.porMision.get('Laboratorio de Tablas') >= 5 },
+  { id:'buho',    icon:'🦉', nombre:'Búho Responsable', cond: s => s.noches >= 1 },
+  { id:'guardian',icon:'🌙', nombre:'Guardián de la Noche', cond: s => s.noches >= 5 },
+  { id:'tareas',  icon:'📝', nombre:'Tareas al Día', cond: s => s.porMision.get('Tareas Hechas') >= 5 },
+  { id:'maleta',  icon:'🎒', nombre:'Maleta Ninja', cond: s => s.porMision.get('Maleta Lista') >= 5 },
 ];
 function saludo(){ const h = new Date().getHours(); return h < 12 ? 'BUENOS DÍAS' : h < 19 ? 'BUENAS TARDES' : 'BUENAS NOCHES'; }
 
@@ -578,12 +590,13 @@ function renderPlay(){
     const m = state.misiones.find(x=>x.id===c.mision_id);
     if (m) porMision.set(m.nombre, (porMision.get(m.nombre)||0)+1);
   });
-  const stats = { total: state.completados.length, racha, nivel, porMision };
+  const stats = { total: state.completados.length, racha, nivel, porMision, noches: (typeof nochesPerfectas === 'function') ? nochesPerfectas(state.completados).length : 0 };
   renderGaitEntry();
   renderEstudioEntry();
   if (typeof renderLabEntry === 'function') renderLabEntry();
   if (typeof renderEnglishEntry === 'function') renderEnglishEntry();
   if (typeof renderArteEntry === 'function') renderArteEntry();
+  if (typeof renderNocheEntry === 'function') renderNocheEntry();
   document.body.classList.toggle('tema-valentina', n.nombre === 'Valentina');
   renderHorario();
   renderNotifEntry();
@@ -597,6 +610,7 @@ async function tocarMision(misionId){
   if (state.busy) return;
   const m = state.misiones.find(x=>x.id===misionId);
   const reg = state.completados.find(c => c.mision_id===misionId && c.fecha===hoy());
+  if (!reg && typeof nocheInterceptar === 'function' && nocheInterceptar(m)) return;   // tareas y maleta tienen su propio ritual
   state.busy = true;
 
   try {
@@ -1081,7 +1095,7 @@ async function renderPanel(){
       <div class="section-h" style="--c:${esc(n.color)};margin-top:0">// Seguimiento · ${esc(n.nombre)}</div>
       <div style="font-size:14px;font-weight:500">Cumplimiento 7 días: <b>${hechas}/${esperadas}</b> (${pct}%)</div>${barra(pct, 'var(--lime)')}
       <div style="font-size:14px;font-weight:500;margin-top:8px">A tiempo: <b>${pctT === null ? '—' : puntual + '/' + conLimite.length + ' (' + pctT + '%)'}</b></div>${pctT === null ? '' : barra(pctT, 'var(--cyan)')}
-      <div style="color:var(--muted);font-family:var(--m);font-size:12px;margin-top:8px">Última misión: ${ult ? esc(ult.toLocaleString('es-CO')) : '—'}<br>Estudio: ${cuenta('en:') ? cuenta('en:') + ' de inglés · ' : ''}${cuenta('lab:') ? cuenta('lab:') + ' labs · ' : ''}${cuenta('arte:') ? cuenta('arte:') + ' dibujos · ' : ''}${est.filter(e => !/^(en|lab|arte):/.test(e.leccion || '')).length} lecciones/retos</div>
+      <div style="color:var(--muted);font-family:var(--m);font-size:12px;margin-top:8px">Última misión: ${ult ? esc(ult.toLocaleString('es-CO')) : '—'}<br>Estudio: ${cuenta('en:') ? cuenta('en:') + ' de inglés · ' : ''}${cuenta('lab:') ? cuenta('lab:') + ' labs · ' : ''}${cuenta('arte:') ? cuenta('arte:') + ' dibujos · ' : ''}${est.filter(e => !/^(en|lab|arte|noche):/.test(e.leccion || '')).length} lecciones/retos</div>
       ${alerta}
     </div>`;
   }).join('');
@@ -1089,6 +1103,7 @@ async function renderPanel(){
   const labHtml = (typeof renderPanelLab === 'function') ? await renderPanelLab() : '';
   const enHtml = (typeof renderPanelEnglish === 'function') ? await renderPanelEnglish() : '';
   const arteHtml = (typeof renderPanelArte === 'function') ? await renderPanelArte() : '';
+  const nocheHtml = (typeof renderPanelNoche === 'function') ? await renderPanelNoche() : '';
   let ayudaHtml = '';
   try {
     const { data: ay, error: eAy } = await sb.rpc('ver_ayudas', { p_pin: state.pin });
@@ -1102,6 +1117,7 @@ async function renderPanel(){
     </div>
     ${cards}
     ${seguimientoHtml}
+    ${nocheHtml}
     <div id="panel-push"></div>
     ${ayudaHtml}
     ${galeria}
@@ -1121,7 +1137,7 @@ async function renderPanel(){
 
 /* ============ ARRANQUE ============ */
 (async function init(){
-  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 9 · Misiones OS<br><a href="#panel" id="link-panel" style="color:var(--dim);font-size:11px;text-decoration:none;display:inline-block;margin-top:8px;padding:6px 10px">🔒 Panel de Daniel</a>';
+  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 10 · Misiones OS<br><a href="#panel" id="link-panel" style="color:var(--dim);font-size:11px;text-decoration:none;display:inline-block;margin-top:8px;padding:6px 10px">🔒 Panel de Daniel</a>';
   $('#link-panel').onclick = (e) => { e.preventDefault(); history.replaceState(null,'','#panel'); show('v-panel'); };
   if (location.hash === '#panel'){ show('v-panel'); }
   else show('v-pick');
@@ -1143,5 +1159,6 @@ async function renderPanel(){
 <script src="laboratorio.js"></script>
 <script src="english.js"></script>
 <script src="arte.js"></script>
+<script src="noche.js"></script>
 </body>
 </html>
