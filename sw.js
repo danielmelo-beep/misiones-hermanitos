@@ -1,7 +1,7 @@
 // Service worker: permite abrir la app aunque no haya internet y se actualiza al conectarse.
-const CACHE = 'misiones-v10';
+const CACHE = 'misiones-v11';
 const ASSETS = [
-  './', './index.html', './estudio.js', './laboratorio.js', './profe.js', './english.js', './arte.js', './noche.js', './manifest.webmanifest',
+  './', './index.html', './estudio.js', './laboratorio.js', './profe.js', './english.js', './arte.js', './noche.js', './alarma.js', './manifest.webmanifest',
   './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'
 ];
 
@@ -42,6 +42,10 @@ self.addEventListener('push', (e) => {
     badge: 'icon-192.png',
     tag: d.tag || 'misiones',
     renotify: true,
+    silent: false,
+    requireInteraction: !!d.urgente,                       // las urgentes no desaparecen hasta que las toquen
+    vibrate: d.urgente ? [700, 250, 700, 250, 700, 250, 1000] : [300, 150, 300],
+    timestamp: Date.now(),
     data: { url: d.url || './' },
   }));
 });

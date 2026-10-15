@@ -9,6 +9,7 @@ La app de tareas, estudio y entrenamiento de Frank y Valentina, hecha con cariñ
 - **Ruta del Tercero**: lecciones, retos, tablas con repetición espaciada y el robot de programación (`estudio.js`).
 - **Entrenamiento de Marcha** (solo para Frank). Es una plantilla: el fisioterapeuta debe revisarla y ajustarla.
 - **Recordatorios y horarios** (como Duolingo): avisos en el celular a la hora de bañarse (máximo 9:00 a. m.), tender la cama (9:30 a. m.), dejar uniforme y zapatos listos el día anterior (7:30 p. m., domingo a jueves) y hacer el aseo durante el día. Quien llega a tiempo gana +5 XP. Daniel recibe una alerta si alguno se pasa de la hora.
+- **Alertas más fuertes**: las notificaciones de hora límite vibran largo y no se quitan hasta que las toquen; si la misión sigue sin marcar, se repiten a los 10, 20 y 30 minutos (`REPETIR_CADA` y `REPETICIONES` en la función `enviar-recordatorios`). Con la app abierta suena una alarma con tono fuerte y alerta grande (`alarma.js`). Para que suenen en el celular: Android → Ajustes → Apps → Misiones → Notificaciones en prioridad alta con sonido; iPhone → Notificaciones → Misiones → sonido y banners permanentes. Recomendado: además, alarmas repetidas en el Reloj del celular.
 - **Laboratorio de Sistemas** (solo Frank): 5 laboratorios con pasos, registro de técnico, quiz y fotos de evidencia: conocer el equipo, probar con método, mantenimiento por dentro, mantenimiento del software y un caso de servicio técnico. Sube de rango: Aprendiz → Técnico junior → Técnico de sistemas → Ingeniero en práctica.
 - **Profe** (para estudiar solos): botón de ayuda en cada pantalla de estudio. Lee en voz alta, da pistas de menos a más, muestra un ejemplo resuelto, explica de otra forma, explica palabras nuevas y permite **avisar a Daniel** (te llega una notificación). Tiene letra grande y lectura automática de preguntas.
 - **English Club** (los dos): inglés desde cero con voz, cómo se pronuncia, ejercicios de escuchar, leer, decir y armar frases. Frank tiene unidades de computador y videojuegos; Valentina, de princesas y arte.
@@ -47,7 +48,7 @@ Los avisos salen de una función de Supabase (`enviar-recordatorios`) que corre 
 - `index.html`: la app (diseño Misiones OS).
 - `estudio.js`: Ruta del Tercero.
 - `laboratorio.js`: Laboratorio de Sistemas (Frank).
-- `profe.js`: el Profe (ayuda guiada). `english.js`: English Club. `arte.js`: Taller de Arte. `noche.js`: Misión Nocturna (tareas y maleta).
+- `profe.js`: el Profe (ayuda guiada). `english.js`: English Club. `arte.js`: Taller de Arte. `noche.js`: Misión Nocturna (tareas y maleta). `alarma.js`: alarma dentro de la app.
 - `sw.js` y `manifest.webmanifest`: instalación y uso sin conexión.
 - `schema.sql`: tablas base de Supabase.
 
