@@ -1,0 +1,185 @@
+/* ============================================================
+   BANCOS DE CONTENIDO para los retos infinitos (reto.js)
+   Todo está en español sencillo. Para agregar contenido, solo añade
+   elementos a estas listas. Los paquetes semanales viven en Supabase (tabla contenido).
+   ============================================================ */
+
+/* [inglés, español, emoji, tema] */
+const RB_PALABRAS = [
+  ['dog','perro','🐶','animal'],['cat','gato','🐱','animal'],['bird','pájaro','🐦','animal'],['fish','pez','🐟','animal'],['horse','caballo','🐴','animal'],
+  ['cow','vaca','🐮','animal'],['pig','cerdo','🐷','animal'],['rabbit','conejo','🐰','animal'],['duck','pato','🦆','animal'],['lion','león','🦁','animal'],
+  ['monkey','mono','🐵','animal'],['elephant','elefante','🐘','animal'],['butterfly','mariposa','🦋','animal'],['turtle','tortuga','🐢','animal'],['frog','rana','🐸','animal'],
+  ['bear','oso','🐻','animal'],['sheep','oveja','🐑','animal'],['chicken','pollo','🐔','animal'],['snake','serpiente','🐍','animal'],['spider','araña','🕷️','animal'],
+  ['apple','manzana','🍎','comida'],['banana','banano','🍌','comida'],['bread','pan','🍞','comida'],['milk','leche','🥛','comida'],['egg','huevo','🥚','comida'],
+  ['cheese','queso','🧀','comida'],['rice','arroz','🍚','comida'],['pizza','pizza','🍕','comida'],['cake','pastel','🍰','comida'],['water','agua','💧','comida'],
+  ['orange','naranja','🍊','comida'],['grapes','uvas','🍇','comida'],['strawberry','fresa','🍓','comida'],['carrot','zanahoria','🥕','comida'],['juice','jugo','🧃','comida'],
+  ['chocolate','chocolate','🍫','comida'],['ice cream','helado','🍦','comida'],['soup','sopa','🍲','comida'],['potato','papa','🥔','comida'],['tomato','tomate','🍅','comida'],
+  ['red','rojo','🔴','color'],['blue','azul','🔵','color'],['green','verde','🟢','color'],['yellow','amarillo','🟡','color'],['purple','morado','🟣','color'],
+  ['black','negro','⚫','color'],['white','blanco','⚪','color'],['brown','café','🟤','color'],['pink','rosado','🩷','color'],
+  ['head','cabeza','🧠','cuerpo'],['hand','mano','✋','cuerpo'],['foot','pie','🦶','cuerpo'],['eye','ojo','👁️','cuerpo'],['ear','oreja','👂','cuerpo'],
+  ['nose','nariz','👃','cuerpo'],['mouth','boca','👄','cuerpo'],['leg','pierna','🦵','cuerpo'],['arm','brazo','💪','cuerpo'],['tooth','diente','🦷','cuerpo'],
+  ['house','casa','🏠','casa'],['door','puerta','🚪','casa'],['window','ventana','🪟','casa'],['bed','cama','🛏️','casa'],['chair','silla','🪑','casa'],
+  ['book','libro','📘','escuela'],['pencil','lápiz','✏️','escuela'],['school','escuela','🏫','escuela'],['teacher','profesor','🧑‍🏫','escuela'],['backpack','mochila','🎒','escuela'],
+  ['clock','reloj','🕒','escuela'],['key','llave','🔑','casa'],['shoes','zapatos','👟','casa'],['shirt','camiseta','👕','casa'],['hat','sombrero','🎩','casa'],
+  ['computer','computador','💻','compu'],['mouse','ratón','🖱️','compu'],['keyboard','teclado','⌨️','compu'],['screen','pantalla','🖥️','compu'],['game','juego','🎮','compu'],
+  ['phone','celular','📱','compu'],['battery','batería','🔋','compu'],['password','contraseña','🔐','compu'],['internet','internet','🌐','compu'],['file','archivo','📄','compu'],
+  ['folder','carpeta','📁','compu'],['robot','robot','🤖','compu'],['speaker','parlante','🔊','compu'],['camera','cámara','📷','compu'],['headphones','audífonos','🎧','compu'],
+  ['download','descargar','⬇️','compu'],['update','actualizar','🔄','compu'],['error','error','❌','compu'],['save','guardar','💾','compu'],['delete','borrar','🗑️','compu'],
+  ['crown','corona','👑','arte'],['castle','castillo','🏰','arte'],['dragon','dragón','🐉','arte'],['unicorn','unicornio','🦄','arte'],['fairy','hada','🧚','arte'],
+  ['mermaid','sirena','🧜‍♀️','arte'],['princess','princesa','👸','arte'],['prince','príncipe','🤴','arte'],['magic','magia','✨','arte'],['rainbow','arcoíris','🌈','arte'],
+  ['star','estrella','⭐','arte'],['flower','flor','🌸','arte'],['brush','pincel','🖌️','arte'],['paint','pintura','🎨','arte'],['paper','papel','📄','arte'],
+  ['dress','vestido','👗','arte'],['doll','muñeca','🪆','arte'],['mirror','espejo','🪞','arte'],['wand','varita','🪄','arte'],['moon','luna','🌙','arte'],
+  ['sun','sol','☀️','arte'],['cloud','nube','☁️','arte'],['tree','árbol','🌳','arte'],['garden','jardín','🌷','arte'],['ribbon','moño','🎀','arte'],['jewel','joya','💎','arte'],
+];
+
+/* Completa la frase: s con ___, o opciones, a respuesta, es traducción */
+const RB_FRASES = [
+  { s: 'I ___ happy today.', o: ['am','is','are'], a: 'am', es: 'Yo estoy feliz hoy.' },
+  { s: 'She ___ my sister.', o: ['is','am','are'], a: 'is', es: 'Ella es mi hermana.' },
+  { s: 'They ___ at school.', o: ['are','is','am'], a: 'are', es: 'Ellos están en el colegio.' },
+  { s: 'He ___ a red bike.', o: ['has','have','am'], a: 'has', es: 'Él tiene una bicicleta roja.' },
+  { s: 'We ___ two cats.', o: ['have','has','is'], a: 'have', es: 'Nosotros tenemos dos gatos.' },
+  { s: 'It ___ a big house.', o: ['is','are','am'], a: 'is', es: 'Es una casa grande.' },
+  { s: 'You ___ my best friend.', o: ['are','is','am'], a: 'are', es: 'Tú eres mi mejor amigo.' },
+  { s: 'There ___ a cat on the bed.', o: ['is','are','am'], a: 'is', es: 'Hay un gato en la cama.' },
+  { s: 'There ___ two books on the table.', o: ['are','is','am'], a: 'are', es: 'Hay dos libros sobre la mesa.' },
+  { s: 'I ___ swim very well.', o: ['can','is','are'], a: 'can', es: 'Yo puedo nadar muy bien.' },
+  { s: 'She ___ play the piano.', o: ['can','are','am'], a: 'can', es: 'Ella puede tocar el piano.' },
+  { s: 'This is ___ apple.', o: ['an','a','are'], a: 'an', es: 'Esta es una manzana.' },
+  { s: 'This is ___ dog.', o: ['a','an','are'], a: 'a', es: 'Este es un perro.' },
+  { s: 'My name ___ Ana.', o: ['is','are','am'], a: 'is', es: 'Mi nombre es Ana.' },
+  { s: 'They ___ playing in the park.', o: ['are','is','am'], a: 'are', es: 'Ellos están jugando en el parque.' },
+  { s: 'I have two ___.', o: ['cats','cat','cates'], a: 'cats', es: 'Tengo dos gatos.' },
+  { s: 'She has three ___.', o: ['boxes','boxs','box'], a: 'boxes', es: 'Ella tiene tres cajas.' },
+  { s: '___ you hungry?', o: ['Are','Is','Am'], a: 'Are', es: '¿Tienes hambre?' },
+  { s: '___ she your teacher?', o: ['Is','Are','Am'], a: 'Is', es: '¿Ella es tu profesora?' },
+  { s: 'What ___ your name?', o: ['is','are','am'], a: 'is', es: '¿Cuál es tu nombre?' },
+  { s: 'I ___ ten years old.', o: ['am','is','are'], a: 'am', es: 'Yo tengo diez años.' },
+  { s: 'She ___ blue eyes.', o: ['has','have','is'], a: 'has', es: 'Ella tiene ojos azules.' },
+  { s: 'We ___ in the kitchen.', o: ['are','is','am'], a: 'are', es: 'Estamos en la cocina.' },
+  { s: 'The cat ___ under the table.', o: ['is','are','am'], a: 'is', es: 'El gato está debajo de la mesa.' },
+];
+
+/* Encuentra el que no pertenece (cada grupo tiene 6 elementos) */
+const RB_GRUPOS = {
+  animales: ['🐶 perro','🐱 gato','🐴 caballo','🐮 vaca','🐰 conejo','🦆 pato'],
+  frutas: ['🍎 manzana','🍐 pera','🍇 uvas','🍌 banano','🍓 fresa','🥭 mango'],
+  transporte: ['🚗 carro','🚌 bus','🚲 bicicleta','✈️ avión','🚆 tren','🚢 barco'],
+  tecnología: ['⌨️ teclado','🖱️ ratón','🖥️ pantalla','🎧 audífonos','🔊 parlante','📷 cámara'],
+  ropa: ['👕 camiseta','👖 pantalón','👟 zapatos','👗 vestido','🧢 gorra','🧦 medias'],
+  escuela: ['✏️ lápiz','📘 cuaderno','📏 regla','🖍️ colores','🎒 mochila','📎 clip'],
+  cuento: ['👑 corona','🏰 castillo','🪄 varita','🧚 hada','🐉 dragón','🦄 unicornio'],
+  clima: ['☀️ sol','🌧️ lluvia','⛈️ tormenta','❄️ nieve','🌈 arcoíris','🌬️ viento'],
+  deportes: ['⚽ fútbol','🏀 baloncesto','🎾 tenis','🏐 voleibol','🏊 natación','🚴 ciclismo'],
+  instrumentos: ['🎸 guitarra','🥁 batería','🎹 piano','🎻 violín','🎺 trompeta','🪈 flauta'],
+};
+
+const RB_ANALOGIAS = [
+  { q: 'Perro es a cachorro como gato es a…', o: ['gatito','pez','leche'], a: 0 },
+  { q: 'Pájaro es a volar como pez es a…', o: ['nadar','caminar','saltar'], a: 0 },
+  { q: 'Mano es a guante como pie es a…', o: ['zapato','sombrero','bufanda'], a: 0 },
+  { q: 'Día es a sol como noche es a…', o: ['luna','lluvia','nube'], a: 0 },
+  { q: 'Libro es a leer como lápiz es a…', o: ['escribir','comer','correr'], a: 0 },
+  { q: 'Frío es a hielo como caliente es a…', o: ['fuego','nieve','agua fría'], a: 0 },
+  { q: 'Ojo es a ver como oreja es a…', o: ['oír','oler','hablar'], a: 0 },
+  { q: 'Teclado es a escribir como mouse es a…', o: ['señalar y hacer clic','oír música','guardar archivos'], a: 0 },
+  { q: 'Pintor es a pincel como cocinero es a…', o: ['cuchara','balón','lápiz'], a: 0 },
+  { q: 'Rey es a corona como pirata es a…', o: ['parche','zapatos','crayón'], a: 0 },
+  { q: 'Auto es a gasolina como celular es a…', o: ['batería','agua','papel'], a: 0 },
+  { q: 'Abeja es a miel como vaca es a…', o: ['leche','lana','huevos'], a: 0 },
+];
+
+/* Frank · sistemas: opción 0 siempre es la correcta en el banco; el motor mezcla el orden */
+const RB_SISTEMAS = [
+  { q: '¿Qué es el hardware?', o: ['Las partes físicas del computador, las que puedes tocar','Los programas y juegos','La conexión a internet'], e: 'Hardware es lo físico: pantalla, teclado, mouse. Los programas se llaman software.' },
+  { q: '¿Cuál de estos es software?', o: ['Un videojuego','El teclado','La pantalla'], e: 'Un videojuego es un programa, así que es software. El teclado y la pantalla son hardware.' },
+  { q: 'El teclado es un dispositivo de…', o: ['entrada','salida','energía'], e: 'Entrada: tú le mandas información al computador. Salida es lo que el computador te muestra, como la pantalla.' },
+  { q: 'La pantalla es un dispositivo de…', o: ['salida','entrada','memoria'], e: 'La pantalla te muestra lo que el computador hace. Eso es salida.' },
+  { q: '¿Cuál NO es un dispositivo de entrada?', o: ['Parlante','Mouse','Micrófono'], e: 'El parlante saca sonido: es de salida. Mouse y micrófono mandan información al computador.' },
+  { q: '¿Qué hace la memoria RAM?', o: ['Guarda por un rato lo que estás usando','Guarda tus fotos para siempre','Conecta al Wi-Fi'], e: 'La RAM es la memoria rápida del momento. Al apagar, se vacía.' },
+  { q: 'Si apagas el computador de golpe, ¿qué pierdes?', o: ['Lo que no habías guardado','Todos los archivos guardados','Los programas instalados'], e: 'Lo guardado queda en el disco. Lo que no guardaste estaba en la RAM y se pierde.' },
+  { q: '¿Qué es el CPU?', o: ['El cerebro del computador: hace los cálculos','La caja de cables','El cargador'], e: 'La CPU o procesador ejecuta las instrucciones de los programas.' },
+  { q: '¿Dónde se guardan tus archivos de forma permanente?', o: ['En el disco duro o SSD','En la RAM','En el mouse'], e: 'El disco (HDD o SSD) guarda archivos aunque apagues el equipo.' },
+  { q: '¿Cuál de estas extensiones es una imagen?', o: ['.jpg','.mp3','.txt'], e: '.jpg es imagen, .mp3 es audio y .txt es texto.' },
+  { q: 'Un archivo .mp3 es de…', o: ['audio','imagen','video'], e: 'mp3 es un formato de audio, como tus canciones.' },
+  { q: '¿Qué hace Ctrl + C?', o: ['Copiar','Cortar','Pegar'], e: 'Ctrl + C copia. Ctrl + V pega. Ctrl + X corta.' },
+  { q: '¿Qué hace Ctrl + Z?', o: ['Deshacer','Guardar','Abrir'], e: 'Ctrl + Z deshace lo último que hiciste. ¡Es un salvavidas!' },
+  { q: '¿Qué hace Ctrl + S?', o: ['Guardar','Seleccionar todo','Salir'], e: 'Ctrl + S guarda tu trabajo. Úsalo seguido.' },
+  { q: '¿Cuál contraseña es más segura?', o: ['Gr4n!Dino#2031','mi nombre123','12345'], e: 'Una contraseña buena es larga y mezcla letras, números y símbolos. Nunca uses tu nombre ni 12345.' },
+  { q: 'Te llega un mensaje: "¡Ganaste un premio! Manda tu clave". ¿Qué haces?', o: ['No respondo y le aviso a un adulto','Mando mi clave','Se lo reenvío a mis amigos'], e: 'Es un engaño llamado phishing. Nunca des tus claves y avisa a un adulto.' },
+  { q: '¿Qué es un navegador?', o: ['Un programa para ver páginas web, como Chrome','Un tipo de cable','Un videojuego'], e: 'El navegador te deja entrar a páginas de internet.' },
+  { q: 'Wi-Fi sirve para…', o: ['conectarse a internet sin cables','guardar archivos','dibujar'], e: 'Wi-Fi es la conexión inalámbrica a la red.' },
+  { q: '¿Cuántos bits tiene un byte?', o: ['8','2','16'], e: 'Un byte son 8 bits. Cada bit es un 0 o un 1.' },
+  { q: 'El sistema binario solo usa los números…', o: ['0 y 1','1 y 2','0 al 9'], e: 'Los computadores trabajan con 0 y 1: apagado y encendido.' },
+  { q: '¿Qué es un algoritmo?', o: ['Una lista de pasos en orden para resolver algo','Un virus','Una pantalla'], e: 'Una receta de cocina es un algoritmo: pasos en orden para llegar a un resultado.' },
+  { q: '¿Qué es un bug?', o: ['Un error en un programa','Un tipo de teclado','Una contraseña'], e: 'Los errores de un programa se llaman bugs. Arreglarlos se llama depurar.' },
+  { q: 'En programación, un bucle o loop…', o: ['repite instrucciones','borra el programa','apaga el computador'], e: 'Un bucle repite pasos, por ejemplo "da 10 saltos".' },
+  { q: 'En programación, un "si" (if)…', o: ['decide qué hacer según una condición','repite sin parar','dibuja en pantalla'], e: 'Por ejemplo: SI la vida es 0, ENTONCES fin del juego.' },
+  { q: '¿Qué es una variable?', o: ['Una cajita con nombre donde guardas un dato','Un cable','Un virus'], e: 'Por ejemplo, la variable puntos guarda cuántos puntos llevas.' },
+  { q: '¿Qué es un sistema operativo?', o: ['El programa principal que hace funcionar el equipo, como Windows o Android','Un juego','Una memoria'], e: 'Sin sistema operativo, el computador no sabría ejecutar los demás programas.' },
+  { q: '¿Cuál de estos es un sistema operativo?', o: ['Android','Chrome','Word'], e: 'Android lo es. Chrome es un navegador y Word es un procesador de texto.' },
+  { q: '¿Qué es "la nube"?', o: ['Computadores en internet donde se guardan datos','Una nube del cielo','Un tipo de pantalla'], e: 'Guardar en la nube es guardar en computadores de otra empresa, accesibles por internet.' },
+  { q: '¿Para qué sirve una copia de seguridad?', o: ['Para recuperar tus archivos si algo falla','Para que el computador sea más rápido','Para gastar menos luz'], e: 'Si el equipo se daña, la copia te salva el trabajo.' },
+  { q: 'Un píxel es…', o: ['El punto más pequeño de una imagen en pantalla','Un tipo de cable','Un programa'], e: 'Las imágenes se forman con miles de píxeles de colores.' },
+  { q: '¿Qué es una URL?', o: ['La dirección de una página web','Un virus','Un cable'], e: 'Por ejemplo: https://danielmelo-beep.github.io es una URL.' },
+  { q: '¿Qué hace un antivirus?', o: ['Ayuda a detectar programas dañinos','Acelera el internet','Carga la batería'], e: 'Un antivirus busca y bloquea programas maliciosos.' },
+  { q: '¿Para qué sirve un puerto USB?', o: ['Para conectar dispositivos','Para ver videos','Para guardar contraseñas'], e: 'Ahí conectas memorias, cargadores, mouse y teclados.' },
+  { q: '¿Qué hace la tarjeta gráfica (GPU)?', o: ['Ayuda a dibujar imágenes y juegos en pantalla','Guarda contraseñas','Enfría el equipo'], e: 'Mientras más potente, mejor se ven los juegos.' },
+  { q: 'Actualizar un programa es…', o: ['ponerle la versión más nueva, con mejoras y arreglos','borrarlo','copiarlo'], e: 'Las actualizaciones arreglan bugs y mejoran la seguridad.' },
+  { q: 'En un juego en línea, el "lag" es…', o: ['un retraso entre lo que haces y lo que se ve','un truco secreto','un nivel difícil'], e: 'Suele ser por mala conexión a internet.' },
+  { q: 'Los FPS (cuadros por segundo) miden…', o: ['qué tan fluida se ve la imagen','el tamaño del disco','la velocidad del Wi-Fi'], e: 'Más FPS, más suave se ve el juego.' },
+  { q: 'En un videojuego, un NPC es…', o: ['un personaje controlado por el computador','un jugador real','un arma'], e: 'NPC significa personaje no jugador. Son los que te dan misiones o venden cosas.' },
+  { q: 'Una red local (LAN) es…', o: ['computadores conectados en el mismo lugar','todo el internet del mundo','un programa'], e: 'Por ejemplo, los aparatos conectados al Wi-Fi de tu casa.' },
+];
+
+/* Valentina · arte: opción 0 correcta */
+const RB_ARTE = [
+  { q: 'Si mezclas rojo y amarillo sale…', o: ['naranja','verde','morado'], e: 'Rojo + amarillo = naranja. 🧡' },
+  { q: 'Si mezclas azul y amarillo sale…', o: ['verde','naranja','rosado'], e: 'Azul + amarillo = verde. 💚' },
+  { q: 'Si mezclas rojo y azul sale…', o: ['morado','verde','café'], e: 'Rojo + azul = morado. 💜' },
+  { q: 'Para hacer un color más claro le agregas…', o: ['blanco','negro','rojo'], e: 'El blanco aclara. Con rojo y blanco haces rosado.' },
+  { q: 'Para hacer un color más oscuro le agregas un poquito de…', o: ['negro','blanco','amarillo'], e: 'Un poquito de negro lo oscurece. ¡Poquito, que tiñe mucho!' },
+  { q: 'Los colores primarios son…', o: ['rojo, azul y amarillo','verde, naranja y morado','blanco, negro y gris'], e: 'Con los primarios se pueden mezclar casi todos los demás colores.' },
+  { q: 'Los colores cálidos son…', o: ['rojo, naranja y amarillo','azul, verde y morado','negro, gris y blanco'], e: 'Parecen fuego o sol, por eso se llaman cálidos.' },
+  { q: 'Los colores fríos son…', o: ['azul, verde y morado','rojo, naranja y amarillo','rojo, rosado y amarillo'], e: 'Parecen agua o hielo, por eso se llaman fríos.' },
+  { q: '¿Cuántos lados tiene un triángulo?', o: ['3','4','5'], e: 'Tri = tres. Tres lados y tres esquinas.' },
+  { q: '¿Cuántos lados tiene un hexágono?', o: ['6','5','8'], e: 'Hexa = seis. Como las celdas de un panal de abejas. 🐝' },
+  { q: 'Si doblas una figura y las dos mitades coinciden, tiene…', o: ['simetría','sombra','perspectiva'], e: 'Las alas de una mariposa son simétricas. 🦋' },
+  { q: 'En un dibujo, lo que está lejos se ve…', o: ['más pequeño','más grande','igual'], e: 'Eso se llama perspectiva. Las montañas lejanas se dibujan pequeñas.' },
+  { q: 'La acuarela se pinta con…', o: ['agua y pintura','solo lápiz','arcilla'], e: 'La acuarela se mezcla con agua y queda transparente.' },
+  { q: 'El arcoíris tradicional tiene… colores', o: ['7','5','9'], e: 'Rojo, naranja, amarillo, verde, azul, añil y violeta.' },
+  { q: 'Un retrato es un dibujo de…', o: ['una persona','un paisaje','comida'], e: 'Retrato = una cara o una persona.' },
+  { q: 'Un paisaje es un dibujo de…', o: ['la naturaleza','una persona','un objeto'], e: 'Montañas, ríos, árboles, cielo.' },
+  { q: 'La paleta de un pintor sirve para…', o: ['mezclar los colores','cortar papel','medir'], e: 'Ahí pones y mezclas las pinturas.' },
+  { q: '¿Cuál es un color secundario?', o: ['verde','rojo','azul'], e: 'Los secundarios nacen de mezclar dos primarios: verde, naranja y morado.' },
+  { q: 'Un boceto es…', o: ['un dibujo rápido para empezar','el dibujo ya terminado','una pintura gigante'], e: 'Primero se hace el boceto con lápiz suave y luego se colorea.' },
+  { q: 'En inglés, "brush" significa…', o: ['pincel','pintura','papel'], e: 'Brush = pincel. 🖌️ (y también cepillo).' },
+  { q: 'En inglés, "rainbow" significa…', o: ['arcoíris','estrella','nube'], e: 'Rain = lluvia, bow = arco. 🌈' },
+  { q: 'Si mezclas todos los colores de pintura sale…', o: ['un color oscuro, café o gris','blanco','transparente'], e: 'Las pinturas mezcladas se oscurecen.' },
+  { q: '¿Qué mezclas para hacer rosado?', o: ['rojo y blanco','azul y negro','verde y amarillo'], e: 'Rojo + blanco = rosado. Más blanco, más clarito.' },
+  { q: 'Una figura sin esquinas, toda curva, es un…', o: ['círculo','cuadrado','triángulo'], e: 'El círculo es redondo, no tiene esquinas.' },
+  { q: 'Cuando terminas de pintar con témpera, ¿qué haces?', o: ['Lavo los pinceles y limpio la mesa','Dejo todo así','Pinto la pared'], e: 'Los artistas cuidan sus herramientas. 🧼' },
+];
+
+/* Frank · reto creativo: ordena los pasos del algoritmo */
+const RB_ALGORITMOS = [
+  { t: 'Lavarse los dientes', p: ['Poner pasta en el cepillo','Cepillar todos los dientes','Enjuagar la boca','Guardar el cepillo'] },
+  { t: 'Hacer un sándwich', p: ['Sacar dos panes','Poner jamón y queso','Cerrar el sándwich','Comerlo'] },
+  { t: 'Entrar a un videojuego', p: ['Abrir el juego','Escribir usuario y contraseña','Tocar Entrar','Elegir tu personaje'] },
+  { t: 'Mandar una foto por WhatsApp', p: ['Abrir el chat','Tocar el clip','Elegir la foto','Enviar'] },
+  { t: 'Instalar una app', p: ['Abrir la tienda de apps','Buscar la app','Tocar Instalar','Abrirla'] },
+  { t: 'Guardar un trabajo', p: ['Abrir el programa','Escribir el texto','Tocar Guardar','Ponerle un nombre'] },
+  { t: 'Cruzar la calle', p: ['Parar en la esquina','Mirar a los dos lados','Cruzar caminando','Llegar al otro lado'] },
+  { t: 'Alistar la maleta', p: ['Mirar el horario de mañana','Sacar los cuadernos','Meterlos en la maleta','Cerrar la cremallera'] },
+  { t: 'Conectar un parlante', p: ['Encender el parlante','Activar el Bluetooth del celular','Elegir el parlante','Poner música'] },
+  { t: 'Hacer una resta', p: ['Escribir los números uno debajo del otro','Restar las unidades','Restar las decenas','Revisar el resultado'] },
+  { t: 'Preparar cereal', p: ['Poner el cereal en el plato','Echar la leche','Tomar la cuchara','Comer'] },
+  { t: 'Subir de nivel en un juego', p: ['Ganar puntos','Llegar a la meta de XP','El nivel sube','Recibir la recompensa'] },
+];
+
+/* Valentina · reto creativo: dibujo del día (combinaciones) */
+const RB_DIBUJO = {
+  sujetos: ['una sirena','un unicornio','una princesa','un dragón amigable','un hada','un castillo','una mariposa gigante','un gatito con corona','una muñeca','un jardín mágico','un conejo astronauta','un oso pastelero'],
+  lugares: ['en el fondo del mar','en una montaña con nieve','en un jardín de flores','en la luna','dentro de un castillo','debajo de un arcoíris','en una fiesta de cumpleaños','en un bosque de colores'],
+  reglas: ['usando solo 3 colores','usando solo colores cálidos','usando solo colores fríos','con muchos detalles pequeños','con el fondo todo de un solo color','sin levantar el lápiz del papel (¡reto difícil!)'],
+};

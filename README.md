@@ -55,3 +55,9 @@ Los avisos salen de una función de Supabase (`enviar-recordatorios`) que corre 
 ## Seguridad
 
 Los niños entran sin contraseña, por eso la base solo les permite leer datos, registrar misiones y deshacer las de los últimos días. El PIN del panel no es una protección fuerte. Si quieres algo más robusto, el panel puede pasar a Supabase Auth con tu correo.
+
+## v12 · Retos infinitos
+- `reto.js` + `reto-banco.js`: **Reto del Día** (6 retos nuevos cada día, misión de 20 XP) y **Arcade** por categorías (Mates, English, Lógica, Sistemas/Arte) con cinturones ⚪🟡🟠🟢🔵⚫ que suben/bajan según aciertos. Todo se genera con semilla por fecha: nunca se acaba.
+- **Paquetes de la semana**: tabla `contenido` en Supabase (`nino_id` null = ambos, `disponible_desde`, `activo`, `preguntas` jsonb `{q,o:[correcta,...],a:0,e}`). Para agregar uno basta un INSERT.
+- Resultados quedan en `progreso_estudio` (`reto:*`, `pack:*`) y se ven en el panel.
+- Los niveles viven en el localStorage de cada celular.
