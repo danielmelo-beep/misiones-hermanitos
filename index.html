@@ -280,6 +280,7 @@
     <div class="section-h" style="--c:var(--lime)">// Misiones de hoy</div>
     <div class="missions" id="missions"></div>
 
+    <div id="academia-entry"></div>
     <div id="mundo-tiles"></div>
     <div id="dato-entry"></div>
     <div id="reto-entry"></div>
@@ -346,6 +347,7 @@
   <section id="v-juegos" class="hidden"><div id="juegos-body"></div></section>
   <section id="v-album" class="hidden"><div id="album-body"></div></section>
   <section id="v-tienda" class="hidden"><div id="tienda-body"></div></section>
+  <section id="v-academia" class="hidden"><div id="academia-body"></div></section>
 
   <!-- PANTALLA: centro de mando (Daniel) -->
   <section id="v-panel" class="hidden">
@@ -491,7 +493,7 @@ function aTiempo(c, m){
   return b.fecha === c.fecha && b.min <= minDe(m.hora_limite);
 }
 const diaSemana = () => new Date().getDay();
-const misionesHoy = () => state.misiones.filter(m => !m.dias || m.dias.includes(diaSemana()));
+const misionesHoy = () => state.misiones.filter(m => (!m.dias || m.dias.includes(diaSemana())) && (!m.fecha_unica || m.fecha_unica === hoy()));
 const pasoLaHora = (m) => !!m.hora_limite && enBogota(new Date()).min > minDe(m.hora_limite);
 
 /* ============ CÁLCULOS ============ */
@@ -649,6 +651,7 @@ function renderPlay(){
   renderHorario();
   renderNotifEntry();
   if (typeof renderMundo === 'function') renderMundo();
+  if (typeof renderAcademiaEntry === 'function') renderAcademiaEntry();
   $('#badges').innerHTML = INSIGNIAS.map(b => {
     const on = b.cond(stats);
     return `<div class="badge ${on?'on':''}"><div class="bi">${b.icon}</div><div class="bn">${esc(b.nombre)}</div></div>`;
@@ -1128,7 +1131,7 @@ async function renderPanel(){
     let esperadas = 0;
     for (let i = 0; i < 7; i++){
       const d = new Date(); d.setDate(d.getDate() - i);
-      esperadas += state.misiones.filter(m => !m.dias || m.dias.includes(d.getDay())).length;
+      esperadas += state.misiones.filter(m => (!m.dias || m.dias.includes(d.getDay())) && (!m.fecha_unica || m.fecha_unica === d.toLocaleDateString('en-CA'))).length;
     }
     const hechas = mine.length;
     const pct = esperadas ? Math.min(100, Math.round(hechas / esperadas * 100)) : 0;
@@ -1146,7 +1149,7 @@ async function renderPanel(){
       <div class="section-h" style="--c:${esc(n.color)};margin-top:0">// Seguimiento · ${esc(n.nombre)}</div>
       <div style="font-size:14px;font-weight:500">Cumplimiento 7 días: <b>${hechas}/${esperadas}</b> (${pct}%)</div>${barra(pct, 'var(--lime)')}
       <div style="font-size:14px;font-weight:500;margin-top:8px">A tiempo: <b>${pctT === null ? '—' : puntual + '/' + conLimite.length + ' (' + pctT + '%)'}</b></div>${pctT === null ? '' : barra(pctT, 'var(--cyan)')}
-      <div style="color:var(--muted);font-family:var(--m);font-size:12px;margin-top:8px">Última misión: ${ult ? esc(ult.toLocaleString('es-CO')) : '—'}<br>Estudio: ${cuenta('en:') ? cuenta('en:') + ' de inglés · ' : ''}${cuenta('lab:') ? cuenta('lab:') + ' labs · ' : ''}${cuenta('arte:') ? cuenta('arte:') + ' dibujos · ' : ''}${est.filter(e => !/^(en|lab|arte|noche|reto|pack|juego|animo):/.test(e.leccion || '')).length} lecciones/retos</div>
+      <div style="color:var(--muted);font-family:var(--m);font-size:12px;margin-top:8px">Última misión: ${ult ? esc(ult.toLocaleString('es-CO')) : '—'}<br>Estudio: ${cuenta('en:') ? cuenta('en:') + ' de inglés · ' : ''}${cuenta('lab:') ? cuenta('lab:') + ' labs · ' : ''}${cuenta('arte:') ? cuenta('arte:') + ' dibujos · ' : ''}${est.filter(e => !/^(en|lab|arte|noche|reto|pack|juego|animo|clase|repaso):/.test(e.leccion || '')).length} lecciones/retos</div>
       ${alerta}
     </div>`;
   }).join('');
@@ -1157,6 +1160,7 @@ async function renderPanel(){
   const nocheHtml = (typeof renderPanelNoche === 'function') ? await renderPanelNoche() : '';
   const retoHtml = (typeof renderPanelReto === 'function') ? await renderPanelReto() : '';
   const mundoHtml = (typeof renderPanelMundo === 'function') ? await renderPanelMundo() : '';
+  const acadHtml = (typeof renderPanelAcademia === 'function') ? await renderPanelAcademia() : '';
   let ayudaHtml = '';
   try {
     const { data: ay, error: eAy } = await sb.rpc('ver_ayudas', { p_pin: state.pin });
@@ -1170,6 +1174,7 @@ async function renderPanel(){
     </div>
     ${cards}
     ${mundoHtml}
+    ${acadHtml}
     ${seguimientoHtml}
     ${nocheHtml}
     ${retoHtml}
@@ -1193,7 +1198,7 @@ async function renderPanel(){
 
 /* ============ ARRANQUE ============ */
 (async function init(){
-  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 13 · Misiones OS · Mundo<br><a href="#panel" id="link-panel" style="color:var(--dim);font-size:11px;text-decoration:none;display:inline-block;margin-top:8px;padding:6px 10px">🔒 Panel de Daniel</a>';
+  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 14 · Misiones OS · Academia<br><a href="#panel" id="link-panel" style="color:var(--dim);font-size:11px;text-decoration:none;display:inline-block;margin-top:8px;padding:6px 10px">🔒 Panel de Daniel</a>';
   $('#link-panel').onclick = (e) => { e.preventDefault(); history.replaceState(null,'','#panel'); show('v-panel'); };
   if (location.hash === '#panel'){ show('v-panel'); }
   else show('v-pick');
@@ -1223,5 +1228,6 @@ async function renderPanel(){
 <script src="mascota.js"></script>
 <script src="juegos.js"></script>
 <script src="album.js"></script>
+<script src="clases.js"></script>
 </body>
 </html>

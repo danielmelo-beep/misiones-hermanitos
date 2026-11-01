@@ -474,7 +474,45 @@ function renderMundo(){
   }
 }
 async function mundoAlEntrar(){
-  await Promise.all([cargarCompras(), cargarEquipo(true)]);
+  await Promise.all([cargarCompras(), cargarEquipo(true), nubeBajar()]);
+}
+
+/* ---------- guardar en la nube lo que antes vivía solo en el celular ---------- */
+// Compañero, preferencias, álbum, récords y fichas: se copian a la tabla estado_app y se recuperan al entrar.
+const NUBE_PREFIJOS = ['mascota_', 'mundo_', 'album_', 'juegos_', 'fichas_', 'ac_juego_'];
+const NUBE = { cola: new Map(), t: null, bajando: false };
+const nubeClave = (k) => state.nino && NUBE_PREFIJOS.some(p => k.startsWith(p)) && k.includes(state.nino.id);
+(function(){
+  const base = lsSet;
+  lsSet = function(k, v){
+    base(k, v);
+    if (NUBE.bajando || !nubeClave(k)) return;
+    NUBE.cola.set(k, { nino: state.nino.id, v: String(v) });
+    clearTimeout(NUBE.t); NUBE.t = setTimeout(nubeSubir, 2500);
+  };
+})();
+async function nubeSubir(){
+  if (!NUBE.cola.size) return;
+  const filas = [...NUBE.cola.entries()].map(([k, x]) => ({ nino_id: x.nino, clave: k.slice(0, 80), valor: x.v.slice(0, 20000), updated_at: new Date().toISOString() }));
+  NUBE.cola.clear();
+  try { const { error } = await sb.from('estado_app').upsert(filas, { onConflict: 'nino_id,clave' }); if (error) throw error; }
+  catch(e){ console.error(e); filas.forEach(f => NUBE.cola.set(f.clave, { nino: f.nino_id, v: f.valor })); }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') nubeSubir(); });
+async function nubeBajar(){
+  if (!state.nino) return;
+  try {
+    const { data, error } = await sb.from('estado_app').select('clave,valor').eq('nino_id', state.nino.id);
+    if (error) throw error;
+    const locales = [];
+    NUBE.bajando = true;
+    (data || []).forEach(r => { if (r.valor != null && r.valor !== lsGet(r.clave)) lsSet(r.clave, r.valor); });
+    NUBE.bajando = false;
+    // si en este celular hay algo que la nube no tiene, súbelo
+    try { for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (nubeClave(k) && !(data || []).some(r => r.clave === k)) locales.push(k); } } catch(e){}
+    locales.forEach(k => NUBE.cola.set(k, { nino: state.nino.id, v: lsGet(k) }));
+    if (locales.length) nubeSubir();
+  } catch(e){ NUBE.bajando = false; console.error(e); }
 }
 
 /* ---------- panel de Daniel ---------- */
@@ -519,6 +557,14 @@ async function renderPanelMundo(){
     <button class="btn" id="bz-env" style="width:100%;margin-top:8px">Enviar</button>
     ${msgs.length ? `<div style="margin-top:10px">${msgs.map(m => `<div style="padding:5px 0;border-top:1px solid var(--line);font-size:13px">${m.tipo === 'premio' ? '🎁' : '📬'} <b>${esc(nombre(m.nino_id))}</b> · ${esc(m.texto)} <span style="color:var(--dim)">${esc(haceCuanto(m.created_at))}</span></div>`).join('')}</div>` : ''}
   </div>
+  <div class="panel-card" style="border-color:#FFB02088">
+    <div class="section-h" style="--c:var(--amber);margin-top:0">// Misión sorpresa ⚡</div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:8px">Una misión especial solo por un día, para los dos. Les aparece en su lista con el XP que elijas.</p>
+    <div style="display:grid;grid-template-columns:70px 1fr;gap:8px"><input id="ms-emo" class="mu-sel" value="⚡" maxlength="4" style="text-align:center;font-size:22px"><input id="ms-nom" class="mu-sel" maxlength="60" placeholder="Ej: Ayudar a cocinar la cena"></div>
+    <input id="ms-desc" class="mu-sel" maxlength="200" placeholder="Descripción corta (opcional)" style="width:100%;margin-top:8px">
+    <div style="display:flex;gap:8px;margin-top:8px"><input id="ms-fecha" class="mu-sel" type="date" value="${fechaLocal(new Date())}" style="flex:1"><select id="ms-xp" class="mu-sel"><option value="30">+30 XP</option><option value="50" selected>+50 XP</option><option value="80">+80 XP</option></select></div>
+    <button class="btn" id="ms-crear" style="width:100%;margin-top:8px">Crear misión sorpresa</button>
+  </div>
   <div class="panel-card">
     <div class="section-h" style="--c:var(--amber);margin-top:0">// Misión en equipo</div>
     <div style="font-weight:600">${eq.total}/${eq.meta} misiones entre los dos (${eq.pct}%)</div>
@@ -533,6 +579,16 @@ async function renderPanelMundo(){
   </div>`;
 }
 function panelMundoEventos(){
+  const cr = $('#ms-crear');
+  if (cr) cr.onclick = async () => {
+    const nombre = $('#ms-nom').value.trim(); if (!nombre){ toast('Escribe el nombre de la misión', true); return; }
+    cr.disabled = true;
+    const { error } = await sb.rpc('crear_mision_sorpresa', { p_pin: state.pin, p_nombre: nombre, p_emoji: $('#ms-emo').value.trim() || '⚡', p_descripcion: $('#ms-desc').value.trim(), p_xp: Number($('#ms-xp').value), p_fecha: $('#ms-fecha').value });
+    cr.disabled = false;
+    if (error){ console.error(error); toast(String(error.message).includes('PIN') ? 'El PIN del servidor no coincide' : 'No se pudo crear', true); return; }
+    toast('⚡ ¡Misión sorpresa creada!'); $('#ms-nom').value = ''; $('#ms-desc').value = '';
+    try { await loadBase(); } catch(e){}
+  };
   const env = $('#bz-env'); if (!env) return;
   env.onclick = async () => {
     const texto = $('#bz-txt').value.trim();
