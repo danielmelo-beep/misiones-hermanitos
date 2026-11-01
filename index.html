@@ -204,6 +204,8 @@
   .lab-card .d{color:var(--muted);font-size:13px;font-weight:500}
   .lab-card.done{border-color:var(--lime);background:#0E1D14}
   .lab-card.lock{opacity:.55}
+  .lab-nivel{margin-top:22px;padding:12px 14px;border-radius:12px;background:linear-gradient(90deg,#22E4FF22,transparent);border-left:4px solid var(--cyan)}
+  .lab-nivel b{display:block;font-size:17px} .lab-nivel small{color:var(--muted);font-size:13px} .lab-nivel.lock{opacity:.55;border-left-color:var(--dim)}
   .lab-pasos{display:grid;gap:8px}
   .lab-paso{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:12px 14px;line-height:1.4;font-weight:500}
   .lab-paso input{width:24px;height:24px;flex:none;margin-top:2px;accent-color:#B8FF3D}
@@ -1193,12 +1195,13 @@ async function renderPanel(){
     </div>`;
   renderPanelPush();
   if (typeof panelMundoEventos === 'function') panelMundoEventos();
+  if (typeof panelAcademiaEventos === 'function') panelAcademiaEventos();
   $('#panel-exit').onclick = () => { show('v-pick'); renderPick(); $('#panel-gate').classList.remove('hidden'); $('#panel-body').classList.add('hidden'); $('#pin').value=''; state.pin=null; };
 }
 
 /* ============ ARRANQUE ============ */
 (async function init(){
-  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 14 · Misiones OS · Academia<br><a href="#panel" id="link-panel" style="color:var(--dim);font-size:11px;text-decoration:none;display:inline-block;margin-top:8px;padding:6px 10px">🔒 Panel de Daniel</a>';
+  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 15 · Misiones OS · Academia<br><a href="#panel" id="link-panel" style="color:var(--dim);font-size:11px;text-decoration:none;display:inline-block;margin-top:8px;padding:6px 10px">🔒 Panel de Daniel</a>';
   $('#link-panel').onclick = (e) => { e.preventDefault(); history.replaceState(null,'','#panel'); show('v-panel'); };
   if (location.hash === '#panel'){ show('v-panel'); }
   else show('v-pick');

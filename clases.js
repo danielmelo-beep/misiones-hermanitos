@@ -442,6 +442,7 @@ function acHub(){
     ${rep.length ? `<button class="ac-repaso" id="ac-rep"><span>🔁</span><span><b>Repaso del día · ${rep.length} ${rep.length === 1 ? 'clase' : 'clases'}</b><small>Preguntas mezcladas de lo que ya sabes. ¡Así no se te olvida!</small></span><span class="ac-go">›</span></button>` : ''}
     ${cur.modulos.map(m => `
       <div class="ac-mod"><div class="ac-modt">${m.e} ${esc(m.t)}</div>
+      ${m.clases.length && m.clases.every(c => acEstado(c.id).dominada) ? `<button class="btn ghost" data-cert="${m.id}" style="width:100%;margin-bottom:8px">🎓 Ver mi certificado de este módulo</button>` : ''}
       ${m.clases.length ? `<div class="ac-path">${m.clases.map((c, i) => {
         const st = acEstado(c.id), abierta = acDesbloqueada(c.id);
         const cls = st.dominada ? 'ok' : abierta ? 'open' : 'lock';
@@ -456,6 +457,7 @@ function acHub(){
     acEmpezar(id);
   });
   const r = $('#ac-rep'); if (r) r.onclick = acRepasoEmpezar;
+  body.querySelectorAll('[data-cert]').forEach(b => b.onclick = () => acCertificado(cur.modulos.find(m => m.id === b.dataset.cert)));
   $('#ac-volver').onclick = () => (typeof volverAMisiones === 'function' ? volverAMisiones() : (show('v-play'), renderPlay()));
 }
 
@@ -652,8 +654,19 @@ function acFinalEventos(){
       <button class="btn ghost" id="ac-mapa" style="width:100%;margin-top:8px">Volver al mapa</button></div>`;
     if (sig) $('#ac-next').onclick = () => acEmpezar(sig.id);
     $('#ac-mapa').onclick = acHub;
+    const mod = acCurso().modulos.find(m => m.clases.some(x => x.id === AC.clase.id));
+    if (mod && mod.clases.every(x => acEstado(x.id).dominada)) setTimeout(() => acCertificado(mod), 900);
     if (typeof mundoRefrescar === 'function') mundoRefrescar();
   };
+}
+
+/* ---------------- certificado de módulo ---------------- */
+function acCertificado(mod){
+  const filas = AC.filas || [];
+  const pcts = mod.clases.map(c => { const f = filas.filter(x => x.leccion === 'clase:' + c.id && x.total && x.puntaje / x.total >= 0.8); return f.length ? Math.max(...f.map(x => x.puntaje / x.total)) : 0.8; });
+  const pct = Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length * 100);
+  const fecha = filas.filter(x => mod.clases.some(c => x.leccion === 'clase:' + c.id)).map(x => x.fecha).sort().pop() || hoy();
+  certificadoMostrar({ nombre: state.nino.nombre, escuela: acCurso().titulo.toUpperCase(), emoji: mod.e, logro: 'completó con éxito el', titulo: mod.t.replace(/\s*\(pronto\)/, ''), pct, fecha });
 }
 
 /* ---------------- repaso espaciado (mezclado) ---------------- */
@@ -763,7 +776,24 @@ async function renderPanelAcademia(){
       ${notas.map(f => { const c = todas.find(x => 'clase:' + x.id === f.leccion); return `<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--panel2);font-size:13px"><b>💬 ${esc(c ? c.t : f.leccion)}</b><br>"${esc(f.notas)}"</div>`; }).join('')}</div>`;
   }).join('');
   return `<div class="panel-card" style="border-color:#22E4FF88"><div class="section-h" style="--c:var(--cyan);margin-top:0">// Academia</div>${bloques}
-    <p style="color:var(--muted);font-size:12px;margin-top:10px">Las frases entre comillas son cómo explicaron la clase con sus palabras. Para agregar videos: tabla <b>videos</b> en Supabase (clase + youtube_id).</p></div>`;
+    <p style="color:var(--muted);font-size:12px;margin-top:10px">Las frases entre comillas son cómo explicaron la clase con sus palabras.</p>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><div class="mu-k" style="margin-bottom:6px">📺 AGREGAR UN VIDEO A UNA CLASE</div>
+      <select id="av-clase" class="mu-sel" style="width:100%">${Object.entries(ACADEMIA).map(([nom, cur]) => `<optgroup label="${esc(nom)} · ${esc(cur.titulo)}">${cur.modulos.flatMap(m => m.clases).map(c => `<option value="${c.id}">${esc(c.t)}</option>`).join('')}</optgroup>`).join('')}</select>
+      <input id="av-url" class="mu-sel" style="width:100%;margin-top:8px" placeholder="Pega el link de YouTube (en español)">
+      <input id="av-tit" class="mu-sel" style="width:100%;margin-top:8px" maxlength="120" placeholder="Título (opcional)">
+      <button class="btn" id="av-ok" style="width:100%;margin-top:8px">Agregar video</button></div></div>`;
+}
+function panelAcademiaEventos(){
+  const b = $('#av-ok'); if (!b) return;
+  b.onclick = async () => {
+    const m = $('#av-url').value.trim().match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([A-Za-z0-9_-]{11})/);
+    if (!m){ toast('Ese link no parece de YouTube', true); return; }
+    b.disabled = true;
+    const { error } = await sb.rpc('agregar_video', { p_pin: state.pin, p_clase: $('#av-clase').value, p_youtube_id: m[1], p_titulo: $('#av-tit').value });
+    b.disabled = false;
+    if (error){ console.error(error); toast(String(error.message).includes('PIN') ? 'El PIN del servidor no coincide' : 'No se pudo agregar', true); return; }
+    AC.videos = null; $('#av-url').value = ''; $('#av-tit').value = ''; toast('📺 Video agregado a la clase');
+  };
 }
 
 /* ---------------- estilos ---------------- */

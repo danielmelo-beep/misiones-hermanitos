@@ -681,3 +681,61 @@ function panelMundoEventos(){
   `;
   const st = document.createElement('style'); st.id = 'mu-css'; st.textContent = css; document.head.appendChild(st);
 })();
+
+/* ---------- certificados con mención (laboratorios y academia) ---------- */
+function mencionDe(pct){
+  if (pct >= 100) return { t: 'MENCIÓN DE HONOR', e: '🏅', c: '#FFD700', d: 'Puntaje perfecto. ¡Excelencia total!' };
+  if (pct >= 90) return { t: 'CON DISTINCIÓN', e: '⭐', c: '#C0E8FF', d: 'Un resultado sobresaliente.' };
+  return { t: 'APROBADO', e: '✅', c: '#B8FF3D', d: 'Superaste el reto. ¡Bien hecho!' };
+}
+/* Dibuja el certificado en un canvas: se ve en pantalla y se puede descargar o compartir */
+function certificadoCanvas(o){
+  const W = 1200, H = 850, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d'), m = mencionDe(o.pct);
+  const fondo = g.createLinearGradient(0, 0, W, H); fondo.addColorStop(0, '#0D1530'); fondo.addColorStop(1, '#1E0E33');
+  g.fillStyle = fondo; g.fillRect(0, 0, W, H);
+  g.strokeStyle = m.c; g.lineWidth = 10; g.strokeRect(30, 30, W - 60, H - 60);
+  g.strokeStyle = m.c + '88'; g.lineWidth = 2; g.strokeRect(50, 50, W - 100, H - 100);
+  for (let i = 0; i < 60; i++){ g.fillStyle = `rgba(255,255,255,${Math.random() * .25})`; g.beginPath(); g.arc(Math.random() * W, Math.random() * H, Math.random() * 2.2, 0, 7); g.fill(); }
+  g.textAlign = 'center';
+  const t = (txt, y, size, color, peso) => { let s = size; do { g.font = `${peso || 600} ${s}px "Chakra Petch", system-ui, sans-serif`; s -= 2; } while (g.measureText(txt).width > W - 160 && s > 12); g.fillStyle = color; g.fillText(txt, W / 2, y); };
+  t('MISIONES OS · ' + (o.escuela || 'ACADEMIA'), 115, 26, m.c, 700);
+  g.font = '110px serif'; g.fillText(o.emoji || '🎓', W / 2, 240);
+  t('Certifica que', 300, 30, '#C9D6F0');
+  t(o.nombre, 380, 76, '#FFFFFF', 700);
+  t(o.logro, 445, 32, '#C9D6F0');
+  t(o.titulo, 505, 44, '#FFFFFF', 700);
+  g.fillStyle = m.c + '33'; g.fillRect(W / 2 - 280, 545, 560, 80); g.strokeStyle = m.c; g.lineWidth = 3; g.strokeRect(W / 2 - 280, 545, 560, 80);
+  t(`${m.e}  ${m.t}  ${m.e}`, 600, 44, m.c, 700);
+  t(m.d, 670, 26, '#C9D6F0');
+  t(`Puntaje ${o.pct} %  ·  ${o.fecha}`, 725, 24, '#9FB2D3');
+  t('Daniel — Comandante de Misiones', 785, 26, '#FFFFFF', 600);
+  return c;
+}
+function certificadoMostrar(o){
+  const c = certificadoCanvas(o), m = mencionDe(o.pct);
+  let ov = $('#mu-cert'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'mu-cert';
+  ov.innerHTML = `<div class="mu-cert-in"><img alt="Certificado" src="${c.toDataURL('image/png')}">
+    <p>${m.e} ${esc(m.d)}</p>
+    <div class="mu-cert-row"><button class="btn" id="mu-cert-dl">⬇️ Guardar / compartir</button><button class="btn ghost" id="mu-cert-x">Cerrar</button></div></div>`;
+  document.body.appendChild(ov);
+  if (typeof sonido === 'function') sonido('nivel'); lanzarConfetti(m.c);
+  if (o.pct >= 100) setTimeout(() => lanzarConfetti('#FFD700'), 600);
+  $('#mu-cert-x').onclick = () => ov.remove();
+  $('#mu-cert-dl').onclick = () => c.toBlob(async (b) => {
+    const nombre = `certificado-${(o.nombre + '-' + o.titulo).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 60)}.png`;
+    try {
+      const f = new File([b], nombre, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [f] })){ await navigator.share({ files: [f], title: 'Mi certificado' }); return; }
+    } catch(e){}
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = nombre; a.click();
+  }, 'image/png');
+}
+(function(){
+  const st = document.createElement('style');
+  st.textContent = `#mu-cert{position:fixed;inset:0;z-index:130;background:#000d;display:flex;align-items:center;justify-content:center;padding:16px;animation:mu-in .3s}
+  .mu-cert-in{max-width:620px;width:100%;text-align:center} .mu-cert-in img{width:100%;border-radius:12px;box-shadow:0 20px 60px -10px #000;animation:mu-pop .6s}
+  .mu-cert-in p{margin-top:12px;font-weight:600;color:#fff} .mu-cert-row{display:flex;gap:10px;margin-top:12px} .mu-cert-row .btn{flex:1}`;
+  document.head.appendChild(st);
+})();
