@@ -271,12 +271,17 @@
     <div class="topbar" id="topbar"></div>
     <div class="carta" id="carta"></div>
 
+    <div id="buzon-entry"></div>
+    <div id="mascota-entry"></div>
+    <div id="animo-entry"></div>
     <div id="notif-entry"></div>
     <div id="horario-entry"></div>
 
     <div class="section-h" style="--c:var(--lime)">// Misiones de hoy</div>
     <div class="missions" id="missions"></div>
 
+    <div id="mundo-tiles"></div>
+    <div id="dato-entry"></div>
     <div id="reto-entry"></div>
     <div id="noche-entry"></div>
     <div id="arte-entry"></div>
@@ -337,6 +342,11 @@
     <div style="text-align:center;margin-top:18px"><button class="btn ghost" id="est-back">← Volver a misiones</button></div>
   </section>
 
+  <section id="v-mascota" class="hidden"><div id="mascota-body"></div></section>
+  <section id="v-juegos" class="hidden"><div id="juegos-body"></div></section>
+  <section id="v-album" class="hidden"><div id="album-body"></div></section>
+  <section id="v-tienda" class="hidden"><div id="tienda-body"></div></section>
+
   <!-- PANTALLA: centro de mando (Daniel) -->
   <section id="v-panel" class="hidden">
     <div class="section-h" style="--c:var(--pink)">// Centro de mando</div>
@@ -396,8 +406,35 @@ function toast(msg, err=false){
   const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err?' err':'');
   clearTimeout(toast._t); toast._t = setTimeout(()=> t.className='toast', 3200);
 }
-function show(id){ ['v-pick','v-play','v-panel','v-gait','v-estudio','v-lab','v-ingles','v-arte','v-noche','v-reto'].forEach(v => $('#'+v).classList.toggle('hidden', v!==id));
-  if (id === 'v-pick' || id === 'v-panel') document.body.classList.remove('tema-valentina'); window.scrollTo({top:0,behavior:'smooth'}); }
+function show(id){ document.querySelectorAll('.app > section[id^="v-"]').forEach(v => v.classList.toggle('hidden', v.id!==id));
+  if (id === 'v-pick' || id === 'v-panel'){ document.body.classList.remove('tema-valentina'); [...document.body.classList].filter(c => c.startsWith('tm-')).forEach(c => document.body.classList.remove(c)); }
+  if (typeof mundoDock === 'function') mundoDock(id);
+  window.scrollTo({top:0,behavior:'smooth'}); }
+/* Fotos: se reducen antes de subir (de ~4 MB a ~300 KB) y se reintenta si se corta el internet */
+async function comprimirFoto(file){
+  try {
+    if (!file || !/^image\//.test(file.type || 'image/')) return file;
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); });
+    const max = 1400, k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(img.src);
+    const b = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.8));
+    return (b && b.size < file.size) ? b : file;
+  } catch(e){ return file; }
+}
+async function subirPrueba(file, path){
+  const blob = await comprimirFoto(file);
+  let ultimo;
+  for (let i = 0; i < 3; i++){
+    try {
+      const { error } = await sb.storage.from('pruebas').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+      if (!error) return sb.storage.from('pruebas').getPublicUrl(path).data.publicUrl;
+      ultimo = error;
+    } catch(e){ ultimo = e; }
+    await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+  }
+  throw ultimo || new Error('subida');
+}
 function vibrar(p){ try{ if (navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -519,7 +556,7 @@ function renderPick(){
 
 async function entrar(id){
   state.nino = state.ninos.find(n => n.id === id);
-  try { await loadCompletados(id); }
+  try { await Promise.all([loadCompletados(id), (typeof mundoAlEntrar === 'function' ? mundoAlEntrar() : null)]); }
   catch(e){ console.error(e); toast('No pude cargar tus misiones. Revisa tu internet.', true); return; }
   show('v-play'); renderPlay();
   resincronizarPush();
@@ -544,6 +581,7 @@ function renderPlay(){
       <div class="info">
         <div class="kk">${saludo()}</div>
         <div class="hi">${esc(n.nombre)}</div>
+        <div id="mu-titulo" style="font-size:13px;font-weight:600;color:var(--muted);margin-top:2px"></div>
       </div>
       <div class="lv"><small>NIVEL</small><b>${nivel}</b></div>
     </div>
@@ -554,6 +592,7 @@ function renderPlay(){
     <div class="stats">
       <div class="stat s1">RACHA<b>${racha} ${racha === 1 ? 'día' : 'días'}</b></div>
       <div class="stat s2">HOY<b>${hechasHoy}/${lista.length}</b></div>
+      <div class="stat" style="color:var(--amber);grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center">MONEDAS<b id="mu-saldo-top">🪙 ${typeof monedas === 'function' ? monedas() : 0}</b></div>
     </div>
     <button class="switch" id="switch" style="align-self:flex-start">← CAMBIAR PILOTO</button>`;
   $('#switch').onclick = async () => {
@@ -609,6 +648,7 @@ function renderPlay(){
   document.body.classList.toggle('tema-valentina', n.nombre === 'Valentina');
   renderHorario();
   renderNotifEntry();
+  if (typeof renderMundo === 'function') renderMundo();
   $('#badges').innerHTML = INSIGNIAS.map(b => {
     const on = b.cond(stats);
     return `<div class="badge ${on?'on':''}"><div class="bi">${b.icon}</div><div class="bn">${esc(b.nombre)}</div></div>`;
@@ -656,6 +696,9 @@ async function registrar(m, fotoUrl){
   renderPlay();
   lanzarConfetti(n.color);
   vibrar(40);
+  if (typeof sonido === 'function') sonido('ok');
+  const nivelAntes = state.nivel;
+  setTimeout(() => { if (state.nivel > nivelAntes && typeof sonido === 'function'){ sonido('nivel'); toast(`⬆️ ¡NIVEL ${state.nivel}! Ahora eres ${nivelNombre(state.nivel)} 🎉`); } }, 1600);
   const bono = aTiempo(data, m);
   toast(bono ? `+${m.xp + BONO_A_TIEMPO} XP · ${m.nombre} lista y a tiempo ⚡ ${animo()}` : `+${m.xp} XP · ${m.nombre} lista. ${animo()}`);
   checkDiaCompleto();
@@ -697,10 +740,8 @@ $('#photo').addEventListener('change', async (ev) => {
   try{
     toast('Subiendo tu prueba... 📸');
     const path = `${n.id}/${hoy()}/${misionId}-${Date.now()}.jpg`;
-    const { error: upErr } = await sb.storage.from('pruebas').upload(path, file, { contentType: file.type || 'image/jpeg' });
-    if (upErr) throw upErr;
-    const { data: pub } = sb.storage.from('pruebas').getPublicUrl(path);
-    await registrar(m, pub.publicUrl);
+    const url = await subirPrueba(file, path);
+    await registrar(m, url);
   } catch(e){
     console.error(e); toast('No se pudo subir la foto. Intenta otra vez.', true);
   } finally { state.busy = false; }
@@ -1105,7 +1146,7 @@ async function renderPanel(){
       <div class="section-h" style="--c:${esc(n.color)};margin-top:0">// Seguimiento · ${esc(n.nombre)}</div>
       <div style="font-size:14px;font-weight:500">Cumplimiento 7 días: <b>${hechas}/${esperadas}</b> (${pct}%)</div>${barra(pct, 'var(--lime)')}
       <div style="font-size:14px;font-weight:500;margin-top:8px">A tiempo: <b>${pctT === null ? '—' : puntual + '/' + conLimite.length + ' (' + pctT + '%)'}</b></div>${pctT === null ? '' : barra(pctT, 'var(--cyan)')}
-      <div style="color:var(--muted);font-family:var(--m);font-size:12px;margin-top:8px">Última misión: ${ult ? esc(ult.toLocaleString('es-CO')) : '—'}<br>Estudio: ${cuenta('en:') ? cuenta('en:') + ' de inglés · ' : ''}${cuenta('lab:') ? cuenta('lab:') + ' labs · ' : ''}${cuenta('arte:') ? cuenta('arte:') + ' dibujos · ' : ''}${est.filter(e => !/^(en|lab|arte|noche|reto|pack):/.test(e.leccion || '')).length} lecciones/retos</div>
+      <div style="color:var(--muted);font-family:var(--m);font-size:12px;margin-top:8px">Última misión: ${ult ? esc(ult.toLocaleString('es-CO')) : '—'}<br>Estudio: ${cuenta('en:') ? cuenta('en:') + ' de inglés · ' : ''}${cuenta('lab:') ? cuenta('lab:') + ' labs · ' : ''}${cuenta('arte:') ? cuenta('arte:') + ' dibujos · ' : ''}${est.filter(e => !/^(en|lab|arte|noche|reto|pack|juego|animo):/.test(e.leccion || '')).length} lecciones/retos</div>
       ${alerta}
     </div>`;
   }).join('');
@@ -1115,6 +1156,7 @@ async function renderPanel(){
   const arteHtml = (typeof renderPanelArte === 'function') ? await renderPanelArte() : '';
   const nocheHtml = (typeof renderPanelNoche === 'function') ? await renderPanelNoche() : '';
   const retoHtml = (typeof renderPanelReto === 'function') ? await renderPanelReto() : '';
+  const mundoHtml = (typeof renderPanelMundo === 'function') ? await renderPanelMundo() : '';
   let ayudaHtml = '';
   try {
     const { data: ay, error: eAy } = await sb.rpc('ver_ayudas', { p_pin: state.pin });
@@ -1127,6 +1169,7 @@ async function renderPanel(){
       <button class="btn ghost" id="panel-exit">Salir</button>
     </div>
     ${cards}
+    ${mundoHtml}
     ${seguimientoHtml}
     ${nocheHtml}
     ${retoHtml}
@@ -1144,12 +1187,13 @@ async function renderPanel(){
       </table></div>
     </div>`;
   renderPanelPush();
+  if (typeof panelMundoEventos === 'function') panelMundoEventos();
   $('#panel-exit').onclick = () => { show('v-pick'); renderPick(); $('#panel-gate').classList.remove('hidden'); $('#panel-body').classList.add('hidden'); $('#pin').value=''; state.pin=null; };
 }
 
 /* ============ ARRANQUE ============ */
 (async function init(){
-  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 12 · Misiones OS<br><a href="#panel" id="link-panel" style="color:var(--dim);font-size:11px;text-decoration:none;display:inline-block;margin-top:8px;padding:6px 10px">🔒 Panel de Daniel</a>';
+  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 13 · Misiones OS · Mundo<br><a href="#panel" id="link-panel" style="color:var(--dim);font-size:11px;text-decoration:none;display:inline-block;margin-top:8px;padding:6px 10px">🔒 Panel de Daniel</a>';
   $('#link-panel').onclick = (e) => { e.preventDefault(); history.replaceState(null,'','#panel'); show('v-panel'); };
   if (location.hash === '#panel'){ show('v-panel'); }
   else show('v-pick');
@@ -1175,5 +1219,9 @@ async function renderPanel(){
 <script src="reto-banco.js"></script>
 <script src="reto.js"></script>
 <script src="alarma.js"></script>
+<script src="mundo.js"></script>
+<script src="mascota.js"></script>
+<script src="juegos.js"></script>
+<script src="album.js"></script>
 </body>
 </html>

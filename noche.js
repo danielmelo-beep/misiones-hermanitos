@@ -393,9 +393,7 @@ function nRevision(d){
 async function nSubirFoto(file, tipo){
   const n = state.nino;
   const path = `${n.id}/${hoy()}/noche-${tipo}-${Date.now()}.jpg`;
-  const { error } = await sb.storage.from('pruebas').upload(path, file, { contentType: file.type || 'image/jpeg' });
-  if (error) throw error;
-  return sb.storage.from('pruebas').getPublicUrl(path).data.publicUrl;
+  return subirPrueba(file, path);
 }
 
 async function nSubirTareas(ev, d){
