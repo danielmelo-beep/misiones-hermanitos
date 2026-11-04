@@ -376,6 +376,9 @@ async function labSync(){
       .eq('nino_id', state.nino.id).like('leccion', 'lab:%');
     if (error) throw error;
     const d = labGet();
+    /* si el examen ya no está aprobado en la nube (Daniel lo reinició), se quita también del celular */
+    const aprobadosNube = new Set((data || []).filter(r => String(r.leccion).startsWith('lab:examen-') && r.total && r.puntaje / r.total >= 0.8).map(r => String(r.leccion).slice(4)));
+    Object.keys(d).filter(k => k.startsWith('examen-') && !aprobadosNube.has(k)).forEach(k => { delete d[k]; delete d['cert-visto-' + k.slice(7)]; });
     (data || []).forEach(r => {
       const id = String(r.leccion).slice(4);
       if (id.startsWith('examen-')){ if (r.total && r.puntaje / r.total >= 0.8) d[id] = { aprobado: true, puntaje: r.puntaje, total: r.total }; return; }
@@ -766,7 +769,7 @@ function labCertificado(nv){
     <div style="font-family:var(--m);font-size:11px;letter-spacing:.2em;color:var(--amber)">MISIONES OS · LABORATORIO DE SISTEMAS</div>
     <div style="font-size:70px;margin:8px 0">🎓</div>
     <div style="font-size:14px;color:var(--muted)">Certifica que</div>
-    <div class="bungee" style="font-size:32px;color:var(--cyan);margin:4px 0">${esc(state.nino.nombre)}</div>
+    <div class="bungee" style="font-size:${nombreCert(state.nino.nombre).length > 14 ? 22 : 32}px;color:var(--cyan);margin:4px 0">${esc(nombreCert(state.nino.nombre))}</div>
     <div style="font-size:14px;color:var(--muted)">aprobó el examen de</div>
     <div style="font-weight:800;font-size:18px;margin:4px 0">${esc(niv.nombre)}</div>
     <div style="font-size:14px;color:var(--muted)">y obtiene el título de</div>

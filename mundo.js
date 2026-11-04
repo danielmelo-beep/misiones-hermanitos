@@ -683,6 +683,9 @@ function panelMundoEventos(){
 })();
 
 /* ---------- certificados con mención (laboratorios y academia) ---------- */
+/* Nombre completo para los certificados */
+const NOMBRES_COMPLETOS = { 'Frank': 'Frank Albert Rodriguez Soriano' };
+const nombreCert = (n) => NOMBRES_COMPLETOS[n] || n;
 function mencionDe(pct){
   if (pct >= 100) return { t: 'MENCIÓN DE HONOR', e: '🏅', c: '#FFD700', d: 'Puntaje perfecto. ¡Excelencia total!' };
   if (pct >= 90) return { t: 'CON DISTINCIÓN', e: '⭐', c: '#C0E8FF', d: 'Un resultado sobresaliente.' };
@@ -702,7 +705,7 @@ function certificadoCanvas(o){
   t('MISIONES OS · ' + (o.escuela || 'ACADEMIA'), 115, 26, m.c, 700);
   g.font = '110px serif'; g.fillText(o.emoji || '🎓', W / 2, 240);
   t('Certifica que', 300, 30, '#C9D6F0');
-  t(o.nombre, 380, 76, '#FFFFFF', 700);
+  t(nombreCert(o.nombre), 380, 76, '#FFFFFF', 700);
   t(o.logro, 445, 32, '#C9D6F0');
   t(o.titulo, 505, 44, '#FFFFFF', 700);
   g.fillStyle = m.c + '33'; g.fillRect(W / 2 - 280, 545, 560, 80); g.strokeStyle = m.c; g.lineWidth = 3; g.strokeRect(W / 2 - 280, 545, 560, 80);
@@ -724,7 +727,7 @@ function certificadoMostrar(o){
   if (o.pct >= 100) setTimeout(() => lanzarConfetti('#FFD700'), 600);
   $('#mu-cert-x').onclick = () => ov.remove();
   $('#mu-cert-dl').onclick = () => c.toBlob(async (b) => {
-    const nombre = `certificado-${(o.nombre + '-' + o.titulo).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 60)}.png`;
+    const nombre = `certificado-${(nombreCert(o.nombre) + '-' + o.titulo).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 60)}.png`;
     try {
       const f = new File([b], nombre, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [f] })){ await navigator.share({ files: [f], title: 'Mi certificado' }); return; }
