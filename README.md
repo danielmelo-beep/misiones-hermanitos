@@ -61,3 +61,7 @@ Los niños entran sin contraseña, por eso la base solo les permite leer datos, 
 - **Paquetes de la semana**: tabla `contenido` en Supabase (`nino_id` null = ambos, `disponible_desde`, `activo`, `preguntas` jsonb `{q,o:[correcta,...],a:0,e}`). Para agregar uno basta un INSERT.
 - Resultados quedan en `progreso_estudio` (`reto:*`, `pack:*`) y se ven en el panel.
 - Los niveles viven en el localStorage de cada celular.
+
+## Pruebas automáticas (antes de subir cambios)
+
+`NODE_PATH=$(npm root -g) node pruebas/run.js` — abre la app como Frank y Valentina con Supabase simulado y revisa: datos de todos los labs, clases, unidades de inglés, lecciones y retos; juega cada lab, clase, unidad, lección y juego del arcade de principio a fin; y valida los retos de Arte. Si algo sale con ✗, no se sube. Los labs nuevos de la tabla `labs` se validan al cargar (`labValidar`) y un lab mal armado se descarta en vez de trabar a los niños.

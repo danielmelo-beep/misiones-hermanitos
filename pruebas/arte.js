@@ -1,0 +1,4 @@
+const {start,page}=require('./lib');
+(async()=>{const {srv,b,port}=await start();const errs=[];const pg=await page(b,port,'Valentina',errs);
+const r=await pg.evaluate(()=>{const bad=[];for(const p of PAGINAS){const ids=p.partes.map(x=>x[0]); if(new Set(ids).size!==ids.length)bad.push(p.id+' partes repetidas'); if(!p.tareas||!p.tareas.length)bad.push(p.id+' sin tareas'); (p.tareas||[]).forEach(t=>{ if(!ids.includes(t.r))bad.push(p.id+' tarea parte inexistente '+t.r); if(!colorPor(t.c))bad.push(p.id+' color inexistente '+t.c); if(!t.en||!t.es)bad.push(p.id+' tarea sin texto'); }); arteColorear(p.id); document.querySelector('#ac-lienzo svg'); (p.tareas||[]).forEach(t=>{ARTE_EST.fills[t.r]=colorPor(t.c).h}); if(!p.tareas.every(tareaHecha))bad.push(p.id+' tareas no completables'); } return bad});
+console.log(r.length?r:'arte ok',errs.filter(e=>!e.includes('ERR_FAILED')));await b.close();srv.close()})();

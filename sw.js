@@ -1,5 +1,5 @@
 // Service worker: permite abrir la app aunque no haya internet y se actualiza al conectarse.
-const CACHE = 'misiones-v17';
+const CACHE = 'misiones-v18';
 const ASSETS = [
   './', './index.html', './estudio.js', './laboratorio.js', './profe.js', './english.js', './arte.js', './noche.js', './alarma.js', './mundo.js', './mascota.js', './juegos.js', './album.js', './clases.js', './reto.js', './reto-banco.js', './manifest.webmanifest',
   './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'

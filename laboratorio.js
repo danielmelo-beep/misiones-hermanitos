@@ -303,7 +303,7 @@ LABS.push(
     historia: 'Las apps se instalan desde las tiendas oficiales: Play Store en Android o App Store en iPhone. Las apps "gratis con trucos" de páginas raras pueden traer VIRUS: programas que dañan el aparato o roban información.',
     meta: 'Al final sabrás los pasos para instalar una app sin riesgos.',
     juego: { tipo: 'ordenar', instruccion: 'Pon en orden los pasos para instalar una app segura.',
-      pasos: ['Pedir permiso a un adulto', 'Abrir la tienda oficial (Play Store o App Store)', 'Buscar la app por su nombre', 'Revisar quién la hizo y las estrellas', 'Revisar qué permisos pide', 'Tocar Instalar'] },
+      items: ['Pedir permiso a un adulto', 'Abrir la tienda oficial (Play Store o App Store)', 'Buscar la app por su nombre', 'Revisar quién la hizo y las estrellas', 'Revisar qué permisos pide', 'Tocar Instalar'] },
     real: { pasos: [
       { t: 'Con un adulto, abre la tienda de apps', d: 'Busca una app que ya tengas instalada.' },
       { t: 'Mira las estrellas y los comentarios', d: '¿Cuántas estrellas tiene? ¿Quién la hizo?' } ],
@@ -353,6 +353,20 @@ const labDelNivel = (n) => LABS.filter(l => labNivelDe(l) === n);
 const labNivelCompleto = (n) => { const ls = labDelNivel(n); return ls.length > 0 && ls.every(l => labInfo(l.id).hecho); };
 const labSiguiente = () => LABS.find(l => !labInfo(l.id).hecho && labNivelDe(l) <= labNivelAbierto());
 const labExamenPendiente = () => { const n = labNivelAbierto(); return labNivelCompleto(n) && !labExamenAprobado(n) ? n : 0; };
+/* Revisa que un lab tenga todo lo necesario; también acepta 'pasos' como sinónimo de 'items' en el juego de ordenar */
+function labValidar(l){
+  const j = l.juego || {};
+  if (j.tipo === 'ordenar' && !j.items && Array.isArray(j.pasos)) j.items = j.pasos;
+  if (!l.titulo || !l.historia || !l.meta) return 'falta título, historia o meta';
+  if (j.tipo === 'unir'){ if (!Array.isArray(j.pares) || j.pares.length < 2) return 'unir sin pares'; }
+  else if (j.tipo === 'ordenar'){ if (!Array.isArray(j.items) || j.items.length < 2) return 'ordenar sin items'; }
+  else if (j.tipo === 'clasificar'){ if (!Array.isArray(j.items) || !j.items.length || !Array.isArray(j.cats) || j.cats.length < 2) return 'clasificar sin items o cats'; }
+  else return 'tipo de juego desconocido';
+  if (!l.real || !Array.isArray(l.real.pasos)) return 'real.pasos';
+  if (!Array.isArray(l.quiz) || l.quiz.length < 2 || l.quiz.some(q => !q.p || !Array.isArray(q.ops) || q.ops.length < 2 || q.c == null || q.c >= q.ops.length)) return 'quiz mal armado';
+  if (!l.ayuda || !Array.isArray(l.ayuda.pistas)) return 'ayuda.pistas';
+  return '';
+}
 /* Busca laboratorios nuevos en la nube (tabla labs) */
 let LAB_REMOTOS = false;
 async function labCargarRemotos(){
@@ -364,7 +378,10 @@ async function labCargarRemotos(){
       if (LABS.find(l => l.id === r.id)) return;
       const d = r.datos || {};
       if (d.zonaInfo && !LAB_ZONAS.find(z => z.n === r.zona)) LAB_ZONAS.push({ n: r.zona, emoji: d.zonaInfo.emoji, nombre: d.zonaInfo.nombre, desc: d.zonaInfo.desc, nivel: r.nivel });
-      LABS.push(Object.assign({ real: { pasos: [] }, ayuda: { ejemplo: '', otra: '', pistas: [] } }, d, { id: r.id, zona: r.zona, nivel: r.nivel }));
+      const lab = Object.assign({ real: { pasos: [] }, ayuda: { ejemplo: '', otra: '', pistas: [] } }, d, { id: r.id, zona: r.zona, nivel: r.nivel });
+      const err = labValidar(lab);
+      if (err){ console.error('Lab remoto ' + r.id + ' descartado: ' + err); return; }   // un lab mal armado nunca debe trabar a los niños
+      LABS.push(lab);
     });
   } catch(e){ console.error(e); LAB_REMOTOS = false; }
 }
@@ -549,6 +566,12 @@ function labJuego(lab){
     const b = $('#lab-sig'); b.disabled = false; b.textContent = 'Seguir ▶';
   };
   $('#lab-sig').onclick = () => labReal(lab);
+  const datos = j.tipo === 'unir' ? j.pares : j.tipo === 'ordenar' ? (j.items || j.pasos) : j.items;
+  if (!Array.isArray(datos) || !datos.length){   // red de seguridad: un juego sin datos nunca debe dejar a Frank atascado
+    console.error('Juego sin datos en el lab ' + lab.id);
+    $('#lab-juego').innerHTML = '<p style="text-align:center;color:var(--muted)">Este juego no está disponible hoy. ¡Sigue adelante!</p>';
+    return fin();
+  }
   if (j.tipo === 'unir') juegoUnir(j, fin);
   else if (j.tipo === 'ordenar') juegoOrdenar(j, fin);
   else juegoClasificar(j, fin);

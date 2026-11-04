@@ -259,11 +259,13 @@ async function rCargarPacks(forzar){
   RP.cargando = true;
   try {
     const [c, p] = await Promise.all([
-      sb.from('contenido').select('id,nino_id,titulo,emoji,area,preguntas,disponible_desde').order('disponible_desde', { ascending: false }),
+      sb.from('contenido').select('id,nino_id,titulo,emoji,area,preguntas,disponible_desde,activo').order('disponible_desde', { ascending: false }),
       sb.from('progreso_estudio').select('leccion').eq('nino_id', state.nino.id).like('leccion', 'pack:%'),
     ]);
     if (c.error) throw c.error;
-    RP.lista = (c.data || []).filter(x => !x.nino_id || x.nino_id === state.nino.id);
+    /* solo paquetes activos, de este niño (o de ambos) y que ya llegaron a su fecha; con preguntas válidas */
+    RP.lista = (c.data || []).filter(x => x.activo !== false && (!x.nino_id || x.nino_id === state.nino.id)
+      && (!x.disponible_desde || x.disponible_desde <= hoy()) && Array.isArray(x.preguntas) && x.preguntas.length);
     RP.hechos = new Set(((p && p.data) || []).map(x => x.leccion));
   } catch(e){ RP.lista = []; }
   RP.cargando = false;
