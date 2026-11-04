@@ -303,7 +303,7 @@ LABS.push(
     historia: 'Las apps se instalan desde las tiendas oficiales: Play Store en Android o App Store en iPhone. Las apps "gratis con trucos" de páginas raras pueden traer VIRUS: programas que dañan el aparato o roban información.',
     meta: 'Al final sabrás los pasos para instalar una app sin riesgos.',
     juego: { tipo: 'ordenar', instruccion: 'Pon en orden los pasos para instalar una app segura.',
-      pasos: ['Pedir permiso a un adulto', 'Abrir la tienda oficial (Play Store o App Store)', 'Buscar la app por su nombre', 'Revisar quién la hizo y las estrellas', 'Tocar Instalar', 'Revisar qué permisos pide'] },
+      pasos: ['Pedir permiso a un adulto', 'Abrir la tienda oficial (Play Store o App Store)', 'Buscar la app por su nombre', 'Revisar quién la hizo y las estrellas', 'Revisar qué permisos pide', 'Tocar Instalar'] },
     real: { pasos: [
       { t: 'Con un adulto, abre la tienda de apps', d: 'Busca una app que ya tengas instalada.' },
       { t: 'Mira las estrellas y los comentarios', d: '¿Cuántas estrellas tiene? ¿Quién la hizo?' } ],
@@ -571,7 +571,7 @@ function juegoUnir(j, fin){
   pintar();
 }
 function juegoOrdenar(j, fin){
-  const items = j.items.map((t, i) => ({ i, t })), mezcla = labShuffle(items);
+  const items = (j.items || j.pasos || []).map((t, i) => ({ i, t })), mezcla = labShuffle(items);
   let sig = 0; const puestos = [];
   const pintar = () => {
     $('#lab-juego').innerHTML = `
