@@ -65,3 +65,6 @@ Los niños entran sin contraseña, por eso la base solo les permite leer datos, 
 ## Pruebas automáticas (antes de subir cambios)
 
 `NODE_PATH=$(npm root -g) node pruebas/run.js` — abre la app como Frank y Valentina con Supabase simulado y revisa: datos de todos los labs, clases, unidades de inglés, lecciones y retos; juega cada lab, clase, unidad, lección y juego del arcade de principio a fin; y valida los retos de Arte. Si algo sale con ✗, no se sube. Los labs nuevos de la tabla `labs` se validan al cargar (`labValidar`) y un lab mal armado se descarta en vez de trabar a los niños.
+
+## v20 · Cápsula del tiempo (cumpleaños de Frank)
+- `capsula.js`: Frank sella una carta, predicción, foto y sus números del año; se guarda en `estado_app` (`capsula_cumple`) y solo se abre el 6-nov-2033. Daniel graba un mensaje de voz en el panel (`capsula_voz`, bucket `pruebas/capsula/`) que queda dentro. Probar: `?cumple=1` y `?capsula=abrir`.

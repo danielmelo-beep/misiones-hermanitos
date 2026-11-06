@@ -655,6 +655,7 @@ function renderPlay(){
   if (typeof renderMundo === 'function') renderMundo();
   if (typeof renderAcademiaEntry === 'function') renderAcademiaEntry();
   if (typeof renderCumple === 'function') renderCumple();
+  if (typeof renderCapsula === 'function') renderCapsula();
   $('#badges').innerHTML = INSIGNIAS.map(b => {
     const on = b.cond(stats);
     return `<div class="badge ${on?'on':''}"><div class="bi">${b.icon}</div><div class="bn">${esc(b.nombre)}</div></div>`;
@@ -872,6 +873,7 @@ async function renderPanelPush(){
     try { await activarPush('padre', state.pin); toast('Listo, te avisaré 🔔'); await probarPush('🔔 Alertas de Daniel', 'Aquí te llegarán los avisos de los hermanitos.'); }
     catch(e){ console.error(e); toast(e.message === 'permiso' ? 'No diste permiso' : 'No se pudo activar (¿el PIN es el correcto?)', true); }
     renderPanelPush();
+  if (typeof renderPanelCapsula === 'function') renderPanelCapsula();
   };
   if (test) test.onclick = () => probarPush('🔔 Alertas de Daniel', 'Prueba correcta.').catch(() => toast('No se pudo mostrar el aviso', true));
 }
@@ -1182,6 +1184,7 @@ async function renderPanel(){
     ${nocheHtml}
     ${retoHtml}
     <div id="panel-push"></div>
+    <div id="panel-capsula"></div>
     ${ayudaHtml}
     ${galeria}
     ${labHtml}
@@ -1202,7 +1205,7 @@ async function renderPanel(){
 
 /* ============ ARRANQUE ============ */
 (async function init(){
-  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 15 · Misiones OS · Academia<br><a href="#panel" id="link-panel" style="color:var(--dim);font-size:11px;text-decoration:none;display:inline-block;margin-top:8px;padding:6px 10px">🔒 Panel de Daniel</a>';
+  $('#footer').innerHTML = 'Hecho con amor para Frank y Valentina<br>versión 20 · Misiones OS · Academia<br><a href="#panel" id="link-panel" style="color:var(--dim);font-size:11px;text-decoration:none;display:inline-block;margin-top:8px;padding:6px 10px">🔒 Panel de Daniel</a>';
   $('#link-panel').onclick = (e) => { e.preventDefault(); history.replaceState(null,'','#panel'); show('v-panel'); };
   if (location.hash === '#panel'){ show('v-panel'); }
   else show('v-pick');
@@ -1234,5 +1237,6 @@ async function renderPanel(){
 <script src="album.js"></script>
 <script src="clases.js"></script>
 <script src="cumple.js"></script>
+<script src="capsula.js"></script>
 </body>
 </html>

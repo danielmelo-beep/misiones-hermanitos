@@ -1,0 +1,36 @@
+const {start,NINOS}=require('./lib');
+(async()=>{const {srv,b,port}=await start();const errs=[];
+const ctx=await b.newContext({viewport:{width:400,height:820}});const pg=await ctx.newPage();
+pg.on('pageerror',e=>errs.push('PAGEERROR '+e.message));pg.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
+await pg.route('**/*',r=>{const u=r.request().url();if(u.startsWith('http://localhost'))return r.continue();if(u.includes('supabase-js'))return r.fulfill({contentType:'text/javascript',body:require('fs').readFileSync(require('path').join(__dirname,'stub.txt'),'utf8')});if(u.includes('confetti'))return r.fulfill({contentType:'text/javascript',body:'window.confetti=()=>{}'});return r.abort()});
+await pg.addInitScript(`window.__db=(t,f)=>{ if(t==='ninos')return{data:${JSON.stringify(NINOS)},error:null}; if(t==='estado_app'&&f.nino_id)return{data:[{clave:'capsula_voz',valor:JSON.stringify({url:'https://x/voz.webm'})}],error:null}; return{data:[],error:null,count:0}; };`);
+const shot=async(n)=>{await pg.waitForTimeout(400);await pg.screenshot({path:`/tmp/cumple-shots/cap-${n}.png`})};
+const ok=(c,m)=>console.log((c?'OK   ':'FALLA ')+m);
+await pg.goto(`http://localhost:${port}/index.html?cumple=1`);await pg.waitForSelector('.hero');
+await pg.click(`.hero[data-id="${NINOS[0].id}"]`);await pg.waitForSelector('#cumple-fiesta',{timeout:4000});
+await pg.evaluate(()=>cuCerrarFiesta()); await pg.waitForSelector('#capsula-chip',{timeout:4000});
+ok(await pg.locator('#capsula-chip').textContent().then(t=>/Cápsula del tiempo/.test(t)),'tarjeta de cápsula visible el día del cumple');
+await shot('1-home');
+await pg.click('#cs-go'); await pg.waitForSelector('#cs-sig'); await shot('2-intro');
+await pg.click('#cs-sig'); await pg.waitForSelector('audio'); ok(true,'escena de audio de Daniel'); await shot('3-voz');
+await pg.click('#cs-sig'); await pg.waitForSelector('#cs-carta');
+await pg.click('#cs-sellar'); ok((await pg.textContent('#cs-err')).includes('40 letras'),'exige carta de 40 letras'); 
+await pg.fill('#cs-juego','Minecraft'); await pg.fill('#cs-sueno','Ingeniero de videojuegos'); await pg.fill('#cs-tec','Los carros volarán y habrá robots en casa.');
+await pg.fill('#cs-carta','Hola Frank del futuro. Espero que ya sepas programar y que sigas siendo buen hermano.'); await shot('4-form');
+await pg.click('#cs-sellar'); await pg.waitForSelector('.cs-sello',{timeout:8000}); await shot('5-sellada');
+ok((await pg.textContent('#cu-in')).includes('6 de noviembre de 2033'),'muestra la fecha de apertura');
+await pg.click('#cs-fin'); await pg.waitForTimeout(600);
+const chip=await pg.locator('#capsula-chip').textContent(); ok(/Cápsula sellada · faltan/.test(chip),'tarjeta queda como sellada: '+chip.trim().slice(0,60));
+await pg.click('#cs-go'); await pg.waitForSelector('.cs-lock'); await shot('6-espera'); await pg.click('#cs-x');
+// reabrir en 2033
+await pg.goto(`http://localhost:${port}/index.html?capsula=abrir`);await pg.waitForSelector('.hero');
+await pg.click(`.hero[data-id="${NINOS[0].id}"]`);await pg.waitForSelector('#capsula-chip.lista',{timeout:5000});ok(true,'tarjeta dorada cuando llega 2033'); await shot('7-lista');
+await pg.evaluate(()=>document.getElementById('cs-go').click()); await pg.click('#cs-sig'); await pg.waitForSelector('#cu-tx',{timeout:4000}); await pg.waitForTimeout(3500); await shot('8-carta');
+await pg.click('#cu-tx'); await pg.click('#cs-sig'); await pg.waitForSelector('.cs-num'); await shot('9-resumen');
+const txt=await pg.textContent('#cu-in'); ok(/Minecraft/.test(txt)&&/Ingeniero de videojuegos/.test(txt)&&/robots/.test(txt),'resumen muestra respuestas guardadas');
+ok(await pg.locator('audio').count()===1,'el audio de Daniel va dentro de la cápsula');
+// Valentina no la ve
+await pg.goto(`http://localhost:${port}/index.html?cumple=1`);await pg.waitForSelector('.hero');
+await pg.click(`.hero[data-id="${NINOS[1].id}"]`);await pg.waitForTimeout(1200);
+ok(await pg.locator('#capsula-chip').count()===0,'Valentina no ve la cápsula de Frank');
+console.log('errs',[...new Set(errs.filter(e=>!e.includes('ERR_FAILED')))]);await b.close();srv.close()})();

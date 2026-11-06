@@ -2,7 +2,7 @@
    Necesita Playwright con Chromium. Simula Supabase y los CDN, no toca la base real. */
 const { spawnSync } = require('child_process');
 const path = require('path');
-const suites = ['datos', 'labs', 'academia', 'ingles', 'estudio', 'reto', 'arcade', 'arte', 'cumple 1', 'cumple 2'];
+const suites = ['datos', 'labs', 'academia', 'ingles', 'estudio', 'reto', 'arcade', 'arte', 'cumple 1', 'cumple 2', 'capsula'];
 const malo = /FALLA|PAGEERROR|EXC |generadores: \[|^LAB |^CLASE |^EN |^LEC |^RB_|tareas no completables|errs \[ ?['"]|errores: \[ ?['"]/m;
 let fallo = false;
 for (const s of suites) {
