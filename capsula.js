@@ -7,7 +7,7 @@
    Para probar: ?cumple=1 abre la fiesta, ?capsula=abrir simula que ya llegó 2033.
    Depende de index.html, mundo.js y cumple.js (cuMarco, cuSon, cuFuegos, cuInyectarCss, cuCerrarFiesta).
    ============================================================ */
-const CAPS = { quien: 'Frank', abre: '2033-11-06', clave: 'capsula_cumple', claveVoz: 'capsula_voz', cache: null };
+const CAPS = { quien: 'Frank', abre: '2033-11-06', clave: 'capsula_cumple', claveVoz: 'capsula_voz', claveCancion: 'cumple_cancion', cache: null };
 
 const capsEs = () => !!(state && state.nino && state.nino.nombre === CAPS.quien);
 const capsLsK = (id) => `capsula_local_${id}`;
@@ -96,8 +96,55 @@ function capsCss(){
   document.head.appendChild(s);
 }
 
+
+/* ---------- la canción de cumpleaños (Daniel sube el audio desde el panel) ---------- */
+const CAPS_LETRA = `Hoy se activa un nivel nuevo, Frank cumple once años,
+la pantalla se ilumina de colores y de aplausos.
+Sabe cómo armar un código y ganar cada misión,
+con un mundo de ideas en su gran imaginación.
+
+¡Feliz cumpleaños, Frank, comandante del juego!
+Cada año que cumples sube de nivel el fuego.
+Tu hermano está contigo en cada misión,
+¡a por el nivel doce con todo el corazón!
+
+Un futuro de ingeniero que ya empieza a programar,
+cada error es una pista para aprender y mejorar.
+Con tu esfuerzo y tu talento llegarás hasta donde quieras,
+y tu cápsula del tiempo guardará todas tus metas.
+
+¡Feliz cumpleaños, Frank, comandante del juego!
+Cada año que cumples sube de nivel el fuego.
+Tu hermano está contigo en cada misión,
+¡a por el nivel doce con todo el corazón!`;
+async function capsCancion(){
+  if (!capsEs()) return null;
+  try {
+    const { data, error } = await sb.from('estado_app').select('valor').eq('nino_id', state.nino.id).eq('clave', CAPS.claveCancion);
+    if (!error && Array.isArray(data) && data[0] && data[0].valor){ const o = capsJson(data[0].valor); if (o && o.url) return o; }
+  } catch(e){}
+  return null;
+}
+function capsEscenaCancion(c){
+  capsCss();
+  cuMarco(`<div class="cu-ttl"><small>HECHA SOLO PARA TI</small><h2>🎵 Tu canción de cumpleaños</h2></div>
+    <div class="cs-voz"><audio controls autoplay preload="auto" src="${esc(c.url)}"></audio></div>
+    <div class="cs-card"><small>LETRA</small><p style="font-size:16px;font-weight:600;white-space:pre-wrap;line-height:1.55">${esc(CAPS_LETRA)}</p></div>
+    <div class="cu-btns"><button class="cu-b alt" id="cs-x">Volver</button></div>`, 'cu-c');
+  cuFuegos(4);
+  document.getElementById('cs-x').onclick = () => cuCerrarFiesta();
+}
+async function capsBotonCancion(){
+  const fila = document.querySelector('#cumple-banner .cb-row');
+  if (!fila || fila.querySelector('#cb-cancion')) return;
+  const c = await capsCancion(); if (!c) return;
+  const f2 = document.querySelector('#cumple-banner .cb-row'); if (!f2 || f2.querySelector('#cb-cancion')) return;
+  const b = document.createElement('button'); b.id = 'cb-cancion'; b.textContent = '🎵 Tu canción'; b.onclick = () => capsEscenaCancion(c); f2.appendChild(b);
+}
+
 /* ---------- entrada: tarjeta en la pantalla de misiones ---------- */
 async function renderCapsula(){
+  capsBotonCancion();
   const viejo = document.getElementById('capsula-chip');
   if (!capsEs()){ if (viejo) viejo.remove(); return; }
   const { cap } = await capsLeer();
@@ -240,6 +287,8 @@ async function renderPanelCapsula(){
       <button class="btn ghost hidden" id="cp-stop">⏹️ Parar</button>
       <button class="btn hidden" id="cp-save">💾 Guardar para ${esc(nino.nombre)}</button>
     </div>
+    <div style="margin-top:14px;border-top:1px solid #ffffff22;padding-top:12px"><b style="font-size:13px">🎵 Canción de cumpleaños</b><div style="color:var(--muted);font-size:12px;margin:4px 0 8px">Sube el archivo de audio (mp3, m4a) y a ${esc(nino.nombre)} le aparece el botón "Tu canción" con la letra.</div>
+      <input type="file" id="cp-song" accept="audio/*"> <button class="btn hidden" id="cp-song-ok">⬆️ Subir canción</button></div>
     <div id="cp-prev" style="margin-top:10px"></div><div id="cp-msg" style="font-family:var(--m);font-size:12px;margin-top:6px;color:var(--amber)"></div>
     <div style="color:var(--dim);font-size:12px;margin-top:8px">Idea: dile lo que admiras de él, un recuerdo, y qué esperas que haya logrado a los 18. Entre 30 segundos y 2 minutos.</div></div>`;
   const msg = (t) => { const m = document.getElementById('cp-msg'); if (m) m.textContent = t; };
@@ -262,6 +311,23 @@ async function renderPanelCapsula(){
       document.getElementById('cp-rec').classList.add('hidden'); document.getElementById('cp-save').classList.add('hidden'); document.getElementById('cp-stop').classList.remove('hidden');
       CAPSP.timer = setInterval(() => { const s = Math.round((Date.now() - CAPSP.t0) / 1000); msg(`🔴 Grabando… ${s} s`); if (s >= 150) CAPSP.rec.stop(); }, 500);
     } catch(e){ console.error(e); msg('No pude usar el micrófono. Revisa el permiso del navegador.'); }
+  };
+  const song = document.getElementById('cp-song');
+  song.onchange = () => document.getElementById('cp-song-ok').classList.toggle('hidden', !song.files[0]);
+  document.getElementById('cp-song-ok').onclick = async () => {
+    const f = song.files[0]; if (!f) return;
+    if (f.size > 15 * 1024 * 1024){ msg('El audio pesa más de 15 MB. Usa un mp3 más liviano.'); return; }
+    msg('Subiendo canción…');
+    try {
+      const ext = (f.name.split('.').pop() || 'mp3').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5) || 'mp3';
+      const path = `capsula/${nino.id}-cancion-${Date.now()}.${ext}`;
+      const { error } = await sb.storage.from('pruebas').upload(path, f, { contentType: f.type || 'audio/mpeg' });
+      if (error) throw error;
+      const url = sb.storage.from('pruebas').getPublicUrl(path).data.publicUrl;
+      const r = await sb.from('estado_app').upsert({ nino_id: nino.id, clave: CAPS.claveCancion, valor: JSON.stringify({ url, subida: hoy() }), updated_at: new Date().toISOString() }, { onConflict: 'nino_id,clave' });
+      if (r.error) throw r.error;
+      msg('✅ Canción lista. ' + nino.nombre + ' verá el botón "🎵 Tu canción" en su cumpleaños.');
+    } catch(e){ console.error(e); msg('No se pudo subir la canción. Revisa internet e intenta de nuevo.'); }
   };
   document.getElementById('cp-stop').onclick = () => { try { CAPSP.rec.stop(); } catch(e){} };
   document.getElementById('cp-save').onclick = async () => {
