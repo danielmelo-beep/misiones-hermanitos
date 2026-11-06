@@ -83,7 +83,7 @@ async function comprar(id){
 const fichasKey = () => `fichas_${state.nino.id}_${hoy()}`;
 function ticketsHoy(){
   if (!state.nino) return 0;
-  const ganadas = 1 + misionesHechasHoy() + (diaCompletoHoy() ? 3 : 0);
+  const ganadas = 1 + misionesHechasHoy() + (diaCompletoHoy() ? 3 : 0) + (typeof cumpleFichas === 'function' ? cumpleFichas() : 0);
   return Math.max(0, ganadas - (Number(lsGet(fichasKey())) || 0));
 }
 function usarTicket(){
@@ -694,7 +694,7 @@ function mencionDe(pct){
 /* Dibuja el certificado en un canvas: se ve en pantalla y se puede descargar o compartir */
 function certificadoCanvas(o){
   const W = 1200, H = 850, c = document.createElement('canvas'); c.width = W; c.height = H;
-  const g = c.getContext('2d'), m = mencionDe(o.pct);
+  const g = c.getContext('2d'), m = o.mencion || mencionDe(o.pct);
   const fondo = g.createLinearGradient(0, 0, W, H); fondo.addColorStop(0, '#0D1530'); fondo.addColorStop(1, '#1E0E33');
   g.fillStyle = fondo; g.fillRect(0, 0, W, H);
   g.strokeStyle = m.c; g.lineWidth = 10; g.strokeRect(30, 30, W - 60, H - 60);
@@ -711,12 +711,12 @@ function certificadoCanvas(o){
   g.fillStyle = m.c + '33'; g.fillRect(W / 2 - 280, 545, 560, 80); g.strokeStyle = m.c; g.lineWidth = 3; g.strokeRect(W / 2 - 280, 545, 560, 80);
   t(`${m.e}  ${m.t}  ${m.e}`, 600, 44, m.c, 700);
   t(m.d, 670, 26, '#C9D6F0');
-  t(`Puntaje ${o.pct} %  ·  ${o.fecha}`, 725, 24, '#9FB2D3');
+  t(o.pie || `Puntaje ${o.pct} %  ·  ${o.fecha}`, 725, 24, '#9FB2D3');
   t('Daniel — Comandante de Misiones', 785, 26, '#FFFFFF', 600);
   return c;
 }
 function certificadoMostrar(o){
-  const c = certificadoCanvas(o), m = mencionDe(o.pct);
+  const c = certificadoCanvas(o), m = o.mencion || mencionDe(o.pct);
   let ov = $('#mu-cert'); if (ov) ov.remove();
   ov = document.createElement('div'); ov.id = 'mu-cert';
   ov.innerHTML = `<div class="mu-cert-in"><img alt="Certificado" src="${c.toDataURL('image/png')}">

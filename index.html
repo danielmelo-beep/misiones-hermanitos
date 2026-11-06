@@ -654,6 +654,7 @@ function renderPlay(){
   renderNotifEntry();
   if (typeof renderMundo === 'function') renderMundo();
   if (typeof renderAcademiaEntry === 'function') renderAcademiaEntry();
+  if (typeof renderCumple === 'function') renderCumple();
   $('#badges').innerHTML = INSIGNIAS.map(b => {
     const on = b.cond(stats);
     return `<div class="badge ${on?'on':''}"><div class="bi">${b.icon}</div><div class="bn">${esc(b.nombre)}</div></div>`;
@@ -1232,5 +1233,6 @@ async function renderPanel(){
 <script src="juegos.js"></script>
 <script src="album.js"></script>
 <script src="clases.js"></script>
+<script src="cumple.js"></script>
 </body>
 </html>
